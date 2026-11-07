@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gem Awakening Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>:root{color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>
+/* Layout: steel and ice. Status strip, gear cards with partner checks up front; inventory and rules folded away. One deliberate dark look. */
+:root{
+  --bg:#06080c; --panel:#0c1118; --panel2:#121a25; --line:#263243; --edge:#9aa6b8; --fg:#eef2f7; --muted:#8c98aa;
+  --accent:#3d8bff; --accent-2:#e6ecf3; --accent-ink:#ffffff; --blood:#c0392b;
+  --s1:#7fb2ff; --s2:#b58cff; --s5:#f2c94c;
+  --good:#5fd38a; --good-bg:#0f2418; --bad:#ff7a6b; --bad-bg:#2c1210; --warn:#f2c94c; --warn-bg:#2a2210;
+  --display:"Cinzel",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:radial-gradient(1200px 500px at 50% -120px,#3a1d0d55,transparent 70%),var(--bg);background-attachment:fixed;color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+h1{font-family:var(--display);font-size:1.9rem;margin:0;letter-spacing:.06em;text-wrap:balance;color:var(--accent-2);text-shadow:0 0 18px #d9822b55}
+h2{font-family:var(--display);font-size:1.15rem;margin:0;letter-spacing:.05em;color:var(--accent-2)}
+.sub{color:var(--muted);margin:4px 0 0;max-width:70ch}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 7px;min-width:0}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input[type=number]{width:5.2em}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:6px 11px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.ghost{background:transparent}
+button.small{padding:3px 8px;font-size:.82rem}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:flex-end}
+.save{font-size:.8rem;color:var(--muted)}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.strip>div{background:var(--panel);padding:12px 14px;display:grid;gap:2px}
+.strip .big{font-family:var(--mono);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.controls{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:12px}
+.controls .row label{display:flex;gap:6px;align-items:center}
+.gear{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;display:grid;min-width:0}
+.card header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.card header h3{margin:0;font-family:var(--display);font-size:1rem;letter-spacing:.03em}
+.main{display:grid;grid-template-columns:1fr auto auto auto;gap:6px 8px;padding:10px 12px;align-items:end}
+.main .f{display:grid;gap:2px;min-width:0}
+.main .f input:not([type=number]){width:100%}
+.req{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hint{font-size:.78rem;color:var(--muted)}
+.slots{display:grid;border-top:1px solid var(--line)}
+.slot{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:8px 12px;border-bottom:1px dashed var(--line)}
+.slot:last-child{border-bottom:0}
+.slot .tag{grid-row:span 2;display:grid;place-items:center;width:44px;height:44px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-family:var(--mono);font-size:.78rem;text-align:center;line-height:1.1}
+.slot .ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-width:0}
+.slot .ctl select{flex:1 1 170px}
+.slot .ctl input.want{flex:1 1 120px}
+.slot .meta{font-size:.78rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.lock{font-size:.75rem;display:flex;gap:4px;align-items:center;color:var(--muted)}
+.foot{padding:10px 12px;border-top:1px solid var(--line);background:var(--panel2);border-radius:0 0 10px 10px;display:grid;gap:6px}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+.bar.pw>i{background:var(--good)}
+.bar.pw.short>i{background:var(--bad)}
+.pill{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--good-bg);color:var(--good)}
+.pill.short{background:var(--bad-bg);color:var(--bad)}
+.pill.idle{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.st{font-weight:600;font-family:var(--mono)}
+.st1{color:var(--s1)} .st2{color:var(--s2)} .st5{color:var(--s5)}
+.sugg{font-size:.78rem;color:var(--warn);background:var(--warn-bg);border-radius:5px;padding:2px 6px}
+.sugg.get{color:var(--bad);background:var(--bad-bg)}
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:12px;min-width:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+td input{width:100%}
+td input[type=number]{width:5em}
+tr.zero td{color:var(--muted)}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600}
+textarea{width:100%;min-height:90px;font-family:var(--mono);font-size:.82rem}
+.note{font-size:.82rem;color:var(--muted);max-width:80ch}
+.flag{border-left:3px solid var(--warn);padding:6px 10px;background:var(--warn-bg);border-radius:0 6px 6px 0;font-size:.84rem}
+.example{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+@media (max-width:480px){.main{grid-template-columns:1fr 1fr}.gear{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--edge);box-shadow:inset 0 1px 0 #ffffff0a,0 6px 18px #0008}
+.card header{background:linear-gradient(180deg,#2a1f15,transparent);border-bottom:1px solid var(--edge)}
+.card header h3{color:var(--accent-2)}
+.strip{border-color:var(--edge);background:var(--edge)}
+.strip>div{background:linear-gradient(180deg,var(--panel2),var(--panel))}
+.strip .big{color:var(--accent-2)}
+.controls,section.panel,details.fold{border-color:var(--edge)}
+details.fold{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;border-top:1px solid var(--edge)}
+details.fold>summary{font-family:var(--display);font-size:1.05rem;letter-spacing:.05em;color:var(--accent-2);list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.fold>summary::after{content:"Show";font-family:var(--body);font-size:.78rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+details.fold[open]>summary::after{content:"Hide"}
+details.fold[open]>summary{margin-bottom:12px}
+details.edit{border-top:0;padding:0;grid-column:1/-1}
+details.edit>summary{font-size:.78rem;color:var(--muted);font-weight:500}
+details.edit[open]>.main{padding:8px 0 0}
+.mainline{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.mainline .gname{font-family:var(--display);font-size:1rem;color:var(--fg)}
+.slot{border-bottom:1px solid #2a2119}
+.slot .tag{background:#120f0c;border-color:var(--edge)}
+.slot.partner .tag{border-color:var(--good);box-shadow:0 0 0 1px #7ed49233}
+.slot.offpartner .tag{border-color:var(--warn)}
+.slot.closed{opacity:.55}
+.slot .want{background:transparent;border-color:transparent;border-bottom:1px dashed var(--line);border-radius:0;font-size:.8rem;color:var(--muted);padding:2px 0}
+.slot .want:hover,.slot .want:focus{border-color:var(--line);background:var(--panel)}
+.foot{background:#120f0c;border-top:1px solid var(--edge)}
+.bar{background:#2a2119}
+.bar>i{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.bar.pw>i{background:linear-gradient(90deg,#3f9a57,var(--good))}
+.bar.pw.short>i{background:linear-gradient(90deg,var(--blood),var(--bad))}
+button{background:#211a14;border-color:var(--edge)}
+button:hover{border-color:var(--accent)}
+button.primary{background:linear-gradient(180deg,var(--accent-2),var(--accent));color:var(--accent-ink);border-color:#f0b45a}
+input,select,textarea{background:#110e0b;border-color:var(--line)}
+.flag{background:var(--warn-bg)}
+
+/* boxy pass: square corners, hard borders, flat fills, no glow */
+*,*::before,*::after{border-radius:0!important}
+body{background:var(--bg)!important}
+h1{text-shadow:none;text-transform:uppercase;letter-spacing:.12em;font-size:1.6rem}
+.wrap{gap:12px}
+.strip,.controls,details.fold,section.panel,.card{border:2px solid var(--edge);box-shadow:none}
+.strip{gap:2px;background:var(--edge)}
+.strip>div,.card,.controls,details.fold{background:var(--panel)}
+.strip>div{padding:10px 12px}
+.card header{background:var(--panel2);border-bottom:2px solid var(--edge);padding:8px 12px}
+.card header h3{text-transform:uppercase;letter-spacing:.1em;font-size:.9rem}
+.gear{gap:12px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.slot{border-bottom:1px solid var(--line);padding:6px 10px}
+.slot .tag{background:var(--panel2);border:2px solid var(--line);width:40px;height:40px}
+.slot.partner .tag{border-color:var(--good);box-shadow:none;background:var(--good-bg)}
+.slot.offpartner .tag{border-color:var(--warn);background:var(--warn-bg)}
+.foot{background:var(--panel2);border-top:2px solid var(--edge)}
+.bar{height:10px;background:#000;border:1px solid var(--line)}
+.bar>i,.bar.pw>i,.bar.pw.short>i{background:var(--accent)}
+.bar.pw>i{background:var(--good)}
+.bar.pw.short>i{background:var(--bad)}
+.pill{border:1px solid currentColor;text-transform:uppercase;letter-spacing:.06em;font-size:.66rem}
+button{background:var(--panel2);border:2px solid var(--edge);text-transform:uppercase;letter-spacing:.06em;font-size:.78rem;font-weight:600}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.small{font-size:.7rem}
+input,select,textarea{border:1px solid var(--edge);background:#000}
+details.fold>summary::after{border:1px solid var(--edge);text-transform:uppercase;letter-spacing:.06em}
+.sugg{border:1px solid currentColor}
+table th{background:var(--panel2)}
+
+/* steel pass */
+h1{color:#fff;letter-spacing:.14em}
+h2,.card header h3,details.fold>summary{color:#fff}
+.strip .big{color:#fff}
+.strip,.controls,details.fold,.card{border-color:var(--edge)}
+.card header{background:linear-gradient(90deg,#1b2635,#0c1118);border-bottom-color:var(--edge)}
+.foot{border-top-color:var(--edge)}
+.strip{background:var(--edge)}
+.strip>div:first-child .big{color:var(--accent)}
+button{border-color:#5d6a7d;color:var(--fg)}
+button:hover{border-color:#fff}
+button.primary{background:var(--accent);border-color:#8fbcff;color:#fff}
+.bar>i{background:var(--accent)}
+input,select,textarea{background:#03050a;border-color:#3a475a}
+.wrap>*{min-width:0}
+details.fold{min-width:0;overflow:hidden}
+
+.goal{border:2px solid var(--edge)}
+.goalgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.goalcard{border:1px solid var(--line);background:var(--panel2);padding:10px 12px;display:grid;gap:6px;min-width:0}
+.goalcard h3{margin:0;font-family:var(--display);font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.goalcard .big{font-size:1.2rem;color:var(--accent)}
+ol.steps{margin:4px 0 0;padding-left:20px;display:grid;gap:4px}
+ol.steps li{display:grid;gap:1px;font-size:.84rem}
+.goalcard{align-content:start}
+
+.tabs{gap:6px}
+.tab.on,.seg button.on,.tog.on{background:var(--accent);border-color:#8fbcff;color:#fff}
+.seg{display:inline-flex}
+.seg button{border-right-width:0}
+.seg button:last-child{border-right-width:2px}
+.filebtn{cursor:pointer;border:2px solid #5d6a7d;background:var(--panel2);padding:6px 11px;text-transform:uppercase;letter-spacing:.06em;font-size:.78rem;font-weight:600}
+.filebtn:focus-within{outline:2px solid var(--accent)}
+.checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:8px;align-items:start}
+.ckgem{border:1px solid var(--line);background:var(--panel);padding:6px 8px;display:grid;gap:6px;min-width:0}
+.ckgem.owned{border-color:var(--edge);background:var(--panel2)}
+.ckhead{display:flex;gap:8px;align-items:center}
+.ckhead .ckname{flex:1;min-width:0;font-weight:500}
+.ckgem:not(.owned) .ckname{color:var(--muted)}
+.copy{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;border-top:1px dashed var(--line);padding-top:6px}
+.step{display:inline-flex;align-items:stretch}
+.step button{padding:2px 9px;font-size:.9rem;min-width:30px}
+.step .val{display:inline-flex;align-items:center;justify-content:center;min-width:44px;border-top:2px solid #5d6a7d;border-bottom:2px solid #5d6a7d;background:#03050a;font-size:.85rem}
+.qstars{display:inline-flex}
+.qs{border:0;background:transparent;padding:0 2px;font-size:1.05rem;color:#3a475a;min-width:0}
+.qs.on{color:var(--s5)}
+.qs:disabled{color:var(--s5);opacity:.6;cursor:default}
+.tog{padding:3px 8px;font-size:.7rem}
+
+.gicon{display:inline-block;vertical-align:middle;flex:none;object-fit:contain;image-rendering:auto}
+.gicon.none{border:1px dashed var(--line)}
+.mainline{align-items:center}
+.slot .meta{align-items:center}
+
+.gicon.shape{position:relative;border:0}
+.gicon.shape::before{content:"";position:absolute;inset:22%;transform:rotate(45deg);border:2px solid currentColor;background:color-mix(in srgb,currentColor 25%,transparent)}
+.gicon.shape.s1{color:var(--s1)}.gicon.shape.s2{color:var(--s2)}.gicon.shape.s5{color:var(--s5)}
+.howto ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px}
+.credits{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;max-width:90ch}
+.credits a{color:var(--accent)}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Gem Awakening Planner</h1>
+      <p class="sub">Diablo Immortal · main gems, partner gems, aux, and the gem power to awaken them.</p>
+    </div>
+    <div class="save" id="saveState">Loading…</div>
+  </div>
+
+  <details class="fold howto" id="howto" open>
+    <summary><span>How to use</span></summary>
+    <ol>
+      <li><b>Inventory:</b> open Inventory, find each gem you own in the checklist, click Add, then set its stars, rank, % and quantity with the buttons. Tick Awake on gems you have already awakened.</li>
+      <li><b>Gem power:</b> enter your loose (unallocated) gem power.</li>
+      <li><b>Plan:</b> click Pick main gems + plan max resonance. Each gear card shows its main gem, the gems for its resonant slots, and a green check on correct partner gems.</li>
+      <li><b>Adjust:</b> pick gems by hand in any slot (they lock), tick Keep to hold a main gem, and reserve ability gems under Aux.</li>
+      <li><b>Back up:</b> your plan saves in this browser only. Use Export backup to keep a copy, and Import backup on another device.</li>
+    </ol>
+  </details>
+
+  <div class="strip" id="strip"></div>
+
+  <div class="controls">
+    <div class="row">
+      <label for="loose"><span class="lbl">Loose gem power</span> <input id="loose" type="number" min="0" step="1"></label>
+    </div>
+    <div class="row">
+      <button class="primary" id="pickMains">Pick main gems + plan max resonance</button>
+      <button id="planMax">Plan max resonance</button>
+      <button id="planAwaken">Plan cheapest infusion</button>
+      <button class="ghost" id="clearPlan">Clear unlocked slots</button>
+      <span class="hint">Locked slots are kept.</span>
+    </div>
+  </div>
+
+  <details class="fold" id="goalPanel">
+    <summary><span>Goal <span class="hint" id="goalSummary" style="font-family:var(--body);letter-spacing:0"></span></span></summary>
+    <label class="row" for="goalRes" style="gap:6px;margin-bottom:10px"><span class="lbl">Goal resonance</span><input id="goalRes" type="number" min="0" step="10" style="width:7em"></label>
+    <div id="goalOut"></div>
+  </details>
+
+  <details class="fold" id="auxFold">
+    <summary><span>Aux gems <span class="hint" id="auxSummary" style="font-family:var(--body);letter-spacing:0"></span></span></summary>
+    <p class="note">Kept out of gear. Their awakening cost comes off your loose gem power first.</p>
+    <div class="grid2" id="auxGrid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px"></div>
+  </details>
+
+  <div class="gear" id="gear"></div>
+
+  <details class="fold" id="partFold">
+    <summary><span>Partner gems <span class="hint" id="partSummary" style="font-family:var(--body);letter-spacing:0"></span></span></summary>
+    <p class="note">Which gems each main gem wants in its resonant slots. Edit any box, or add a gem that is not listed. Rows you changed show Reset to go back to the guide.</p>
+    <div class="row" style="margin-bottom:8px">
+      <input id="partSearch" placeholder="Search gems" style="flex:1 1 180px" aria-label="Search partner list">
+      <label class="row" for="partMine" style="gap:6px"><input type="checkbox" id="partMine" checked> Only gems I own</label>
+    </div>
+    <div class="tbl"><table id="partTable"></table></div>
+    <div class="row" style="margin-top:10px">
+      <input id="partNewName" list="dl-all" placeholder="New gem name" style="flex:1 1 200px" aria-label="New gem name">
+      <select id="partNewStar" aria-label="New gem star"><option value="5">5★</option><option value="2">2★</option><option value="1">1★</option></select>
+      <button id="partAdd">Add gem</button>
+    </div>
+  </details>
+
+  <details class="fold" id="invFold" open>
+    <summary><span>Inventory <span class="hint" id="invSummary" style="font-family:var(--body);letter-spacing:0"></span></span></summary>
+    <div id="exampleBanner"></div>
+    <div class="row tabs" role="tablist">
+      <button class="tab" id="tabCheck" role="tab">Checklist</button>
+      <button class="tab" id="tabTable" role="tab">Table</button>
+      <span style="flex:1"></span>
+      <button id="exportBtn">Export backup</button>
+      <label class="filebtn" for="importFile">Import backup<input type="file" id="importFile" accept=".json,application/json" hidden></label>
+    </div>
+    <div id="backupMsg"></div>
+    <div id="checkView">
+      <div class="row" style="margin:8px 0">
+        <input id="ckSearch" placeholder="Search gems" style="flex:1 1 180px" aria-label="Search gems">
+        <div class="seg" role="group" aria-label="Star filter"><button class="ckStar" data-s="0">All</button><button class="ckStar" data-s="5">5★</button><button class="ckStar" data-s="2">2★</button><button class="ckStar" data-s="1">1★</button></div>
+        <label class="row" for="ckOwned" style="gap:6px"><input type="checkbox" id="ckOwned"> Owned only</label>
+      </div>
+      <div id="checkList" class="checklist"></div>
+      <div class="row" style="margin-top:10px"><input id="ckNewName" placeholder="Gem not listed? Type its name" style="flex:1 1 200px" aria-label="New gem name"><div class="seg" role="group" aria-label="New gem star"><button class="ckNewStar" data-s="5">5★</button><button class="ckNewStar" data-s="2">2★</button><button class="ckNewStar" data-s="1">1★</button></div><button id="ckNewAdd">Add</button></div>
+    </div>
+    <div id="tableView" hidden>
+    <div class="row">
+      <input id="addName" list="dl-all" placeholder="Gem name" style="flex:1 1 200px" aria-label="Gem name">
+      <select id="addStar" aria-label="Star"><option value="1">1★</option><option value="2">2★</option><option value="5">5★</option></select>
+      <select id="addQual" aria-label="5 star quality"><option value="2">2/5</option><option value="3" selected>3/5</option><option value="4">4/5</option><option value="5">5/5</option></select>
+      <label class="row" for="addRank" style="gap:4px"><span class="lbl">Rank</span><input id="addRank" type="number" min="1" max="10" value="1"></label>
+      <label class="row" for="addPct" style="gap:4px"><span class="lbl">%</span><input id="addPct" type="number" min="0" max="99" value="0"></label>
+      <label class="row" for="addCount" style="gap:4px"><span class="lbl">Qty</span><input id="addCount" type="number" min="1" value="1"></label>
+      <button class="primary" id="addBtn">Add gem</button>
+    </div>
+    <div class="tbl"><table id="invTable"></table></div>
+    <details>
+      <summary>Bulk import</summary>
+      <p class="note">One gem per line: <span class="num">name, star, rank, qty, %, quality</span>. Qty, % and quality are optional (quality is 2 to 5 for 5★ gems). Lines are added to the current inventory.</p>
+      <textarea id="bulk" placeholder="Battleguard, 2, 10, 1&#10;Hellbound Desire, 5, 5, 1, 48, 4"></textarea>
+      <div class="row"><button id="bulkBtn">Import lines</button><span class="hint" id="bulkMsg"></span></div>
+    </details>
+    </div>
+  </details>
+
+  <details class="fold" id="rulesFold">
+    <summary><span>Rules and reference tables</span></summary>
+    <p class="note">Everything the planner calculates from is here and editable. Values were checked against in-game screens; if the game changes, fix them here.</p>
+    <div class="row">
+      <label class="row" for="allowHigher" style="gap:6px"><input id="allowHigher" type="checkbox"> Allow a higher-star gem in a lower-star slot</label>
+    </div>
+    <div>
+      <h3 class="lbl">Gem power by rank (at 0%)</h3>
+      <div class="tbl"><table id="rankTable"></table></div>
+      <p class="note">GP to infuse = gem power spent to reach that rank, not counting copies. Worth = what the gem provides when socketed (copies included). Copy value: 1★ 1, 2★ 4, 5★ 32.</p>
+    </div>
+    <div class="grid2">
+      <div>
+        <h3 class="lbl">Progress steps within a rank</h3>
+        <div class="tbl"><table id="stepTable"></table></div>
+        <div class="row"><button class="small" id="addStep">Add step row</button></div>
+        <p class="note">Each progressive step costs one rank 1 copy plus the GP shown. Ranks without a row are estimated in a straight line toward the next rank (marked "estimated").</p>
+      </div>
+      <div>
+        <h3 class="lbl">Slot layout by main gem star</h3>
+        <div id="layoutEd"></div>
+        <h3 class="lbl" style="margin-top:12px">Set Awakening bonus thresholds (resonance from resonant gems)</h3>
+        <div id="tierEd"></div>
+        <h3 class="lbl" style="margin-top:12px">Resonance a resonant gem adds, per rank</h3>
+        <div id="resEd"></div>
+        <p class="note">Resonance per rank of a resonant gem: 1★ 1, 2★ 2, 5★ 10 at 2/5 and 3/5, 10.5 at 4/5. 5/5 at 11 is unconfirmed.</p>
+      </div>
+    </div>
+  </details>
+  <p class="credits">Fan-made tool, not affiliated with Blizzard Entertainment or NetEase. Partner gem data from the Ultimate Gem Guide v1.3 by toninhop (<a href="https://www.youtube.com/@toninhop" target="_blank" rel="noopener">YouTube</a>). Gem power and resonance tables from the Diablo Immortal Player's Companion spreadsheet and in-game checks. Set Awakening thresholds from <a href="https://di-tools.info/legendaryGems/" target="_blank" rel="noopener">di-tools.info</a>. Numbers can drift as the game updates; every table is editable under Rules.</p>
+</div>
+
+<datalist id="dl-all"></datalist>
+<datalist id="dl-1"></datalist><datalist id="dl-2"></datalist><datalist id="dl-5"></datalist>
+
+<script>
+/* ===== CORE (pure) ===== */
+const GEM_NAMES={
+ 1:["Berserker's Eye", "Ca'arsen's Invigoration", "Chained Death", "Defiant Soul", "Everlasting Torment", "Freedom and Devotion", "Mocking Laughter", "Nightmare Wreath", "Pain of Subjugation", "Respite Stone", "Seled's Weakening", "The Black Rose", "Trickshot Gem", "Zod Stone", "Blessed Pebble", "Hearthstone", "Lo's Focused Gaze", "Exigent Echo", "Eye of the Unyielding", "Unrefined Passage", "Misery Elixir", "Lucent Watcher", "Entropic Well", "Havoc Bearer", "Faltergrasp", "Surging Sea", "Mountain Toe", "Flaystone", "Taxman's Pity", "Interminus Stone"],
+ 2:["Battleguard", "Bloody Reach", "Cutthroat's Grin", "Follower's Burden", "Lightning Core", "Power & Command", "The Hunger", "Unity Crystal", "Fervent Fang", "The Abiding Curse", "Volatility Shard", "Kir Sling", "Pain Clasp", "Ironbane", "Mother's Lament", "Viper's Bite", "Igneous Scorn", "Grim Rhythm", "Tear of the Comet", "Mossthorn", "Cold Confidant", "Mercy's Harvest", "Specter Glass", "Crimson Behelit", "Stubborn Oracle", "Fading Nostrum", "Rampant Touch", "Tundra Blight", "The Jolted Eye", "Prong Crag", "Seething Polestar"],
+ 5:["Blood-Soaked Jade", "Bottled Hope", "Chip of Stoned Flesh", "Echoing Shade", "Howler's Call", "Phoenix Ashes", "Seeping Bile", "Zwenson's Haunting", "Blessing of the Worthy", "Frozen Heart", "Hellfire Fragment", "Concentrated Will", "Gloom Cask", "Starfire Shard", "Void Spark", "Spiteful Blood", "Maw of the Deep", "Roiling Consequence", "Hilt of Many Realms", "Stormvault", "Golden Firmament", "Wulfheort", "Hellbound Desire", "Colossus Engine", "Blood Floe", "Haunt Coil", "Leviathan Tomb", "Fated Trail", "Enigma Latera"]
+};
+/* partner gems per slot: Ultimate Gem Guide v1.3 cheat sheet icons, plus newer gems added by players */
+const GUIDE_WANTS={"berserker's eye": ["Everlasting Torment", "Mocking Laughter"], "ca'arsen's invigoration": ["Zod Stone", "The Black Rose"], "chained death": ["Berserker's Eye", "Everlasting Torment"], "defiant soul": ["Nightmare Wreath", "Chained Death"], "everlasting torment": ["Pain of Subjugation", "Trickshot Gem"], "freedom and devotion": ["Chained Death", "Trickshot Gem"], "mocking laughter": ["Ca'arsen's Invigoration", "Berserker's Eye"], "nightmare wreath": ["Respite Stone", "Ca'arsen's Invigoration"], "pain of subjugation": ["Ca'arsen's Invigoration", "Defiant Soul"], "respite stone": ["Everlasting Torment", "Seled's Weakening"], "seled's weakening": ["Pain of Subjugation", "Zod Stone"], "the black rose": ["Trickshot Gem", "Pain of Subjugation"], "trickshot gem": ["Freedom and Devotion", "Nightmare Wreath"], "zod stone": ["Mocking Laughter", "Seled's Weakening"], "blessed pebble": ["Zod Stone", "Respite Stone"], "hearthstone": ["Defiant Soul", "Nightmare Wreath"], "lo's focused gaze": ["The Black Rose", "Blessed Pebble"], "exigent echo": ["Nightmare Wreath", "The Black Rose"], "eye of the unyielding": ["Seled's Weakening", "Berserker's Eye"], "unrefined passage": ["Pain of Subjugation", "Trickshot Gem"], "misery elixir": ["Respite Stone", "Ca'arsen's Invigoration"], "lucent watcher": ["Hearthstone", "Zod Stone"], "entropic well": ["Exigent Echo", "Blessed Pebble"], "havoc bearer": ["Freedom and Devotion", "Eye of the Unyielding"], "battleguard": ["Mocking Laughter", "Bloody Reach", "Follower's Burden"], "bloody reach": ["Everlasting Torment", "Lightning Core", "Power & Command"], "cutthroat's grin": ["The Black Rose", "Unity Crystal", "Battleguard"], "follower's burden": ["Freedom and Devotion", "Battleguard", "Power & Command"], "lightning core": ["Respite Stone", "The Hunger", "Power & Command"], "power & command": ["Berserker's Eye", "The Hunger", "Bloody Reach"], "the hunger": ["Defiant Soul", "Follower's Burden", "Cutthroat's Grin"], "unity crystal": ["Freedom and Devotion", "Follower's Burden", "Cutthroat's Grin"], "fervent fang": ["Chained Death", "Bloody Reach", "Battleguard"], "the abiding curse": ["Blessed Pebble", "Cutthroat's Grin", "Unity Crystal"], "volatility shard": ["Hearthstone", "Kir Sling", "The Abiding Curse"], "kir sling": ["Hearthstone", "Volatility Shard", "The Abiding Curse"], "pain clasp": ["Blessed Pebble", "The Abiding Curse", "The Hunger"], "ironbane": ["Hearthstone", "Volatility Shard", "Kir Sling"], "mother's lament": ["Chained Death", "Follower's Burden", "Power & Command"], "viper's bite": ["Mocking Laughter", "Volatility Shard", "Pain Clasp"], "igneous scorn": ["Everlasting Torment", "Pain Clasp", "Unity Crystal"], "grim rhythm": ["Lo's Focused Gaze", "Pain Clasp", "Volatility Shard"], "tear of the comet": ["Defiant Soul", "Ironbane", "Kir Sling"], "mossthorn": ["Lo's Focused Gaze", "Ironbane", "Mother's Lament"], "cold confidant": ["Lo's Focused Gaze", "Igneous Scorn", "Viper's Bite"], "mercy's harvest": ["Lucent Watcher", "Tear of the Comet", "Mossthorn"], "blood-soaked jade": ["Unity Crystal", "Cutthroat's Grin", "Lightning Core", "Zwenson's Haunting", "Echoing Shade"], "bottled hope": ["Lightning Core", "Power & Command", "The Hunger", "Howler's Call", "Blessing of the Worthy"], "chip of stoned flesh": ["Follower's Burden", "Unity Crystal", "Cutthroat's Grin", "Phoenix Ashes", "Seeping Bile"], "echoing shade": ["Battleguard", "Unity Crystal", "Cutthroat's Grin", "Chip of Stoned Flesh", "Bottled Hope"], "howler's call": ["Bloody Reach", "Battleguard", "Unity Crystal", "Zwenson's Haunting", "Phoenix Ashes"], "phoenix ashes": ["Power & Command", "The Hunger", "Bloody Reach", "Chip of Stoned Flesh", "Howler's Call"], "seeping bile": ["Cutthroat's Grin", "Lightning Core", "Power & Command", "Blessing of the Worthy", "Bottled Hope"], "zwenson's haunting": ["The Hunger", "Unity Crystal", "Lightning Core", "Blood-soaked Jade", "Echoing Shade"], "blessing of the worthy": ["The Hunger", "Follower's Burden", "Battleguard", "Blood-soaked Jade", "Seeping Bile"], "frozen heart": ["Follower's Burden", "Battleguard", "The Abiding Curse", "Zwenson's Haunting", "Blessing of the Worthy"], "hellfire fragment": ["Kir Sling", "The Abiding Curse", "Volatility Shard", "Concentrated Will", "Frozen Heart"], "concentrated will": ["Bloody Reach", "Kir Sling", "Volatility Shard", "Hellfire Fragment", "Frozen Heart"], "gloom cask": ["The Abiding Curse", "Follower's Burden", "Power & Command", "Phoenix Ashes", "Chip of Stoned Flesh"], "starfire shard": ["Lightning Core", "Volatility Shard", "Kir Sling", "Concentrated Will", "Hellfire Fragment"], "void spark": ["Pain Clasp", "The Abiding Curse", "Volatility Shard", "Howler's Call", "Bottled Hope"], "spiteful blood": ["Battleguard", "Bloody Reach", "Kir Sling", "Frozen Heart", "Echoing Shade"], "maw of the deep": ["Battleguard", "The Hunger", "Pain Clasp", "Hellfire Fragment", "Concentrated Will"], "roiling consequence": ["Pain Clasp", "Cutthroat's Grin", "Bloody Reach", "Bottled Hope", "Gloom Cask"], "hilt of many realms": ["Pain Clasp", "Ironbane", "Lightning Core", "Blood-soaked Jade", "Gloom Cask"], "stormvault": ["Mother's Lament", "Ironbane", "Viper's Bite", "Spiteful Blood", "Starfire Shard"], "golden firmament": ["Mother's Lament", "Viper's Bite", "Tear of the Comet", "Starfire Shard", "Spiteful Blood"], "wulfheort": ["Pain Clasp", "Ironbane", "Igneous Scorn", "Void Spark", "Maw of the Deep"], "colossus engine": ["Mossthorn", "Mother's Lament", "Ironbane", "Maw of the Deep", "Void Spark"], "blood floe": ["Mercy's Harvest", "Mossthorn", "Cold Confidant", "Starfire Shard", "Gloom Cask"], "haunt coil": ["Specter Glass", "Viper's Bite", "Igneous Scorn", "Seeping Bile", "Spiteful Blood"], "leviathan tomb": ["The Hunger", "Stubborn Oracle", "Fading Nostrum", "Wulfheort", "Golden Firmament"], "hellbound desire": ["Mercy's Harvest", "Specter Glass", "Igneous Scorn", "Echoing Shade", "Void Spark"]};
+const nk=n=>{const k=String(n||"").toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/\s+/g," ").trim();return k==="gold firmament"?"golden firmament":k};
+function wantsFor(S,name){const k=nk(name);if(!k)return[];return (S.wants&&S.wants[k])||GUIDE_WANTS[k]||[]}
+/* plain gem shapes, colored by star */
+const GEM_ICONS={};
+function gemIcon(name,size){const z=size||28,st=(typeof starOfName==="function"&&starOfName(name))||(typeof starOfKey==="function"?starOfKey(nk(name)):5);return `<span class="gicon shape s${st}" style="width:${z}px;height:${z}px" aria-hidden="true"></span>`}
+const PIECES=[["head","Head"],["shoulder","Shoulder"],["chest","Chest"],["pants","Pants"],["mh1","Main Hand 1"],["mh2","Main Hand 2"],["oh1","Off-Hand 1"],["oh2","Off-Hand 2"]];
+function defaultTables(){
+  return {
+    base:{1:1,2:4,5:32},
+    cum:{1:[0,1,6,16,31,51,76,106,146,196],2:[0,5,20,45,65,150,235,340,490,685],5:[0,50,125,225,475,850,1575,2300,3375,4450]},
+    worth:{1:[1,2,7,17,32,53,79,110,151,202],2:[4,9,24,53,81,186,291,420,606,849],5:[32,82,189,321,731,1298,2407,3516,5167,6818]},
+    steps:[{star:5,rank:4,pct:20,gp:50},{star:5,rank:5,pct:16,gp:60},{star:5,rank:6,pct:8,gp:60},{star:2,rank:5,pct:20,gp:15},{star:2,rank:6,pct:20,gp:15},{star:2,rank:7,pct:16.67,gp:15}],
+    layout:{
+      1:{slots:[{star:1,unlock:1},{star:1,unlock:1}]},
+      2:{slots:[{star:1,unlock:1},{star:2,unlock:1},{star:2,unlock:1}]},
+      5:{slots:[{star:2,unlock:3},{star:2,unlock:4},{star:2,unlock:5},{star:5,unlock:6},{star:5,unlock:7}]}
+    },
+    resRate:{1:1,2:2,q2:10,q3:10,q4:10.5,q5:11},
+    tiers:{1:[10,20],2:[10,20],5:[20,40,60,160,260]},
+    mainRes:{1:[15,30,45,60,75,90,105,120,135,150],2:[30,60,90,120,150,180,210,240,270,300],
+      q2:[30,110,190,280,370,460,550,640,730,820],q3:[60,140,230,320,410,500,590,680,770,860],
+      q4:[90,180,270,360,450,540,630,720,810,900],q5:[100,200,300,400,500,600,700,800,900,1000]}
+  };
+}
+function defaultState(){
+  return Object.assign({
+    v:2,
+    wants:{},
+    aux:[null,null,null,null,null,null,null,null],
+    settings:{loose:0,order:"gems",allowHigher:false,goal:5000},
+    inventory:[],
+    pieces:PIECES.map(([id,label])=>({id,label,name:"",star:5,rank:"",pct:"",reqOverride:"",looseUsed:0,slots:[]}))
+  },defaultTables());
+}
+function uid(){return Math.random().toString(36).slice(2,9)}
+function clampRank(r){r=Math.round(+r||0);return Math.max(1,Math.min(10,r))}
+function stepFor(S,star,rank){return S.steps.find(s=>+s.star===+star&&+s.rank===+rank&&+s.pct>0)}
+/* progress within a rank: GP added (no copies) and worth added (copies included) */
+function progress(S,star,rank,pct){
+  rank=clampRank(rank);pct=Math.max(0,+pct||0);
+  if(rank>=10||pct===0)return{gp:0,worth:0,est:false};
+  const st=stepFor(S,star,rank),base=+S.base[star]||0;
+  if(st){const n=Math.round(pct/(+st.pct));return{gp:n*(+st.gp),worth:n*((+st.gp)+base),est:false}}
+  const c=S.cum[star],w=S.worth[star];
+  return{gp:Math.round(pct/100*((+c[rank])-(+c[rank-1]))),worth:Math.round(pct/100*((+w[rank])-(+w[rank-1]))),est:true};
+}
+function gemPower(S,row){
+  if(row.power!==undefined&&row.power!==""&&row.power!==null)return +row.power||0;
+  const w=S.worth[row.star];if(!w)return 0;
+  return (+w[clampRank(row.rank)-1]||0)+progress(S,row.star,row.rank,row.pct).worth;
+}
+function gemRes(S,row){
+  const rate=+row.star===5?(+S.resRate["q"+(row.quality||3)]||10):(+S.resRate[row.star]||0);
+  return Math.round(rate*clampRank(row.rank));
+}
+/* resonance a gem gives as the MAIN gem: table value plus floor(% of the gap to next rank) */
+function mainResOf(S,star,quality,rank,pct){
+  const t=+star===5?S.mainRes["q"+(quality||3)]:S.mainRes[star];if(!t)return 0;
+  const r=clampRank(rank),v=+t[r-1]||0;
+  if(r>=10||!(+pct>0))return v;
+  return v+Math.floor((+pct)/100*((+t[r]||0)-v)+1e-9);
+}
+function rowMainRes(S,r){return mainResOf(S,r.star,r.quality,r.rank,r.pct)}
+function syncMain(S,p){
+  if(!p.mainRow)return;
+  const r=S.inventory.find(x=>x.id===p.mainRow);
+  if(!r){p.mainRow=null;return}
+  if(+p.star!==+r.star)p.slots=[];
+  p.name=r.name;p.star=+r.star;p.quality=r.quality;p.rank=clampRank(r.rank);p.pct=+r.pct||0;
+}
+function layoutFor(S,star){return S.layout[star]||{slots:[]}}
+function ensureSlots(S,p){
+  syncMain(S,p);
+  const L=layoutFor(S,p.star).slots;
+  if(!Array.isArray(p.slots))p.slots=[];
+  while(p.slots.length<L.length)p.slots.push({want:"",row:null,locked:false});
+  if(p.slots.length>L.length)p.slots.length=L.length;
+  const w=wantsFor(S,p.name);
+  p.slots.forEach((s,i)=>{s.want=w[i]||""});
+}
+function slotOpen(S,p,i){const L=layoutFor(S,p.star).slots[i];return !!L&&p.rank!==""&&+p.rank>=(+L.unlock||1)}
+function slotAccepts(S,slotStar,gemStar){return S.settings.allowHigher?gemStar>=slotStar:gemStar===slotStar}
+function lookupReq(S,p){
+  if(p.reqOverride!==""&&p.reqOverride!==null&&p.reqOverride!==undefined&&!isNaN(+p.reqOverride))return{val:+p.reqOverride,src:"entered"};
+  if(p.rank===""||p.rank===null)return{val:null,src:"none"};
+  const c=S.cum[p.star];if(!c)return{val:null,src:"none"};
+  const pr=progress(S,p.star,p.rank,p.pct);
+  return{val:(+c[clampRank(p.rank)-1])+pr.gp,src:pr.est?"estimate":"calc"};
+}
+function usageMap(S,excludePiece){
+  const u={};
+  for(const a of S.aux||[])if(a)u[a]=(u[a]||0)+1;
+  for(const p of S.pieces){if(p.mainRow)u[p.mainRow]=(u[p.mainRow]||0)+1;if(p===excludePiece)continue;for(const s of p.slots||[])if(s.row)u[s.row]=(u[s.row]||0)+1}
+  return u;
+}
+function availMap(S,excludePiece){
+  const u=usageMap(S,excludePiece),a={};
+  for(const r of S.inventory)a[r.id]=Math.max(0,(+r.count||0)-(u[r.id]||0));
+  return a;
+}
+function slotRes(S,p,i){
+  const s=p.slots[i];if(!s||!s.row)return 0;
+  const r=S.inventory.find(x=>x.id===s.row);return r?gemRes(S,r):0;
+}
+function maxSlotRes(S,p,i){
+  const L=layoutFor(S,p.star).slots[i];if(!L)return 0;
+  const rate=+L.star===5?(+S.resRate.q5||11):(+S.resRate[L.star]||0);return Math.round(rate*10);
+}
+function awakenCost(S,r){
+  if(r.awakened)return 0;
+  const c=S.cum[r.star];if(!c)return 0;
+  return (+c[clampRank(r.rank)-1])+progress(S,r.star,r.rank,r.pct).gp;
+}
+const TIER_W=1000;
+function tierCount(S,star,res){return ((S.tiers&&S.tiers[star])||[]).filter(t=>res>=+t).length}
+function tierScore(S,star,res){return tierCount(S,star,res)*TIER_W+res}
+/* 1★ and 2★ main gems are fed gem power directly; resonant gems do not fill them */
+function selfFed(p){return +p.star!==5}
+function mainFeedCost(S,p){if(!selfFed(p))return 0;const r=p.mainRow&&S.inventory.find(x=>x.id===p.mainRow);if(r&&r.awakened)return 0;const q=lookupReq(S,p);return q.val||0}
+function pieceStats(S,p){
+  ensureSlots(S,p);
+  const req=lookupReq(S,p);let gp=0,res=0,used=0,maxRes=0,open=0,cost=0,matchRes=0;
+  p.slots.forEach((s,i)=>{
+    if(!slotOpen(S,p,i)){s.row=null;s.locked=false;return}
+    open++;maxRes+=maxSlotRes(S,p,i);
+    if(s.row){const r=S.inventory.find(x=>x.id===s.row);if(r){gp+=gemPower(S,r);used++;res+=gemRes(S,r);cost+=awakenCost(S,r);if(s.want&&nk(r.name)===nk(s.want))matchRes+=gemRes(S,r)}else s.row=null}
+  });
+  const feed=mainFeedCost(S,p);cost+=feed;
+  const total=selfFed(p)?(lookupReq(S,p).val||0):gp,loose=cost;
+  const active=!!(p.name||p.rank!=="");
+  let status="idle";
+  if(active&&req.val===null)status="needreq";else if(active&&req.val!==null)status=total>=req.val?"ok":"short";
+  const mainRes=active&&p.rank!==""?mainResOf(S,p.star,p.quality,p.rank,p.pct):0;
+  const tl=(S.tiers&&S.tiers[p.star])||[],tier=tierCount(S,p.star,matchRes),next=tl.find(t=>matchRes<+t);
+  return{feed,selfFed:selfFed(p),matchRes,tier,tierMax:tl.length,nextTier:next===undefined?null:+next,req,gp,loose,cost,total,res,maxRes,mainRes,pieceRes:mainRes+(status==="ok"?res:0),used,open,status,short:req.val===null?0:Math.max(0,req.val-total),surplus:req.val===null?0:Math.max(0,total-req.val)};
+}
+/* put the highest-resonance gems from inventory in as main gems (pieces with a kept main gem are skipped) */
+function autoPickMains(S){
+  const free=S.pieces.filter(p=>!p.mainLocked);
+  for(const p of free){p.mainRow=null;p.name="";p.rank="";p.pct="";p.reqOverride="";p.looseUsed=0;p.slots=[]}
+  for(const p of S.pieces)p.slots.forEach(s=>{if(!s.locked)s.row=null});
+  const avail=availMap(S,null),pool=[];
+  for(const r of S.inventory)for(let i=0;i<(avail[r.id]||0);i++)pool.push(r);
+  pool.sort((a,b)=>rowMainRes(S,b)-rowMainRes(S,a)||gemPower(S,a)-gemPower(S,b));
+  free.forEach((p,i)=>{const r=pool[i];if(!r)return;p.mainRow=r.id;syncMain(S,p);ensureSlots(S,p)});
+}
+function multisets(groups,k){
+  const out=[];
+  (function rec(gi,left,pick,pw,co,rs){
+    if(gi===groups.length){out.push({n:pick.length,power:pw,cost:co,res:rs,picks:pick.slice()});return}
+    const g=groups[gi];
+    for(let c=0;c<=Math.min(left,g.avail);c++){
+      for(let j=0;j<c;j++)pick.push(gi);
+      rec(gi+1,left-c,pick,pw+c*g.power,co+c*g.cost,rs+c*g.res);
+      pick.length-=c;
+    }
+  })(0,k,[],0,0,0);
+  return out;
+}
+/* best gems for the free slots: power must reach `need`; maximize resonance - lambda * awaken cost */
+function chooseCombo(S,p,freeIdx,avail,need,lambda,capCost,baseRes){
+  baseRes=baseRes||0;
+  const L=layoutFor(S,p.star).slots;
+  const slotStars=[...new Set(freeIdx.map(i=>+L[i].star))].sort((a,b)=>b-a);
+  const buckets=slotStars.map(st=>{
+    const k=freeIdx.filter(i=>+L[i].star===st).length;
+    const map={};
+    for(const r of S.inventory){
+      if(!(avail[r.id]>0)||+r.star!==st)continue;
+      const pw=gemPower(S,r),co=awakenCost(S,r),rs=gemRes(S,r),key=[pw,co,rs].join(":");
+      (map[key]=map[key]||{star:+r.star,power:pw,cost:co,res:rs,avail:0,rows:[]});map[key].avail+=avail[r.id];map[key].rows.push(r);
+    }
+    const groups=Object.values(map).sort((a,b)=>a.power-b.power);
+    return{star:st,k,groups,sets:multisets(groups,k)};
+  });
+  let best=null;
+  (function rec(bi,pw,co,rs,n,acc){
+    if(co>capCost)return;
+    if(bi===buckets.length){
+      if(pw<need)return;
+      const score=rs-lambda*co;
+      if(!best||score>best.score+1e-9||(Math.abs(score-best.score)<=1e-9&&(co<best.cost||(co===best.cost&&n<best.n))))best={score,power:pw,cost:co,res:rs,n,parts:acc.slice()};
+      return;
+    }
+    for(const s of buckets[bi].sets){acc.push(s);rec(bi+1,pw+s.power,co+s.cost,rs+s.res,n+s.n,acc);acc.pop()}
+  })(0,0,0,0,0,[]);
+  if(!best)return null;
+  const assign={},local=Object.assign({},avail);
+  buckets.forEach((b,bi)=>{
+    const part=best.parts[bi];const slots=freeIdx.filter(i=>+L[i].star===b.star);
+    const pending=part.picks.map(gi=>b.groups[gi]);
+    const open=slots.slice();
+    for(const si of slots){
+      const want=(p.slots[si].want||"").trim().toLowerCase();if(!want)continue;
+      const gi=pending.findIndex(g=>g.rows.some(r=>local[r.id]>0&&r.name.trim().toLowerCase()===want));
+      if(gi<0)continue;const g=pending.splice(gi,1)[0];
+      const r=g.rows.find(r=>local[r.id]>0&&r.name.trim().toLowerCase()===want);
+      assign[si]=r.id;local[r.id]--;open.splice(open.indexOf(si),1);
+    }
+    pending.sort((a,b)=>b.power-a.power);
+    for(const g of pending){
+      const si=open.shift();if(si===undefined)break;
+      const r=g.rows.find(r=>local[r.id]>0);if(!r)continue;
+      assign[si]=r.id;local[r.id]--;
+    }
+  });
+  return{assign,power:best.power,cost:best.cost,res:best.res};
+}
+function planPass(S,lambda,skip,orderBy){
+  for(const p of S.pieces){ensureSlots(S,p);p.slots.forEach(s=>{if(!s.locked)s.row=null});p.looseUsed=0}
+  const key=p=>{const st=pieceStats(S,p);return orderBy==="need"?-(st.req.val||0):st.mainRes};
+  const order=S.pieces.slice().sort((a,b)=>key(b)-key(a));
+  const active=order.filter(p=>{if(skip.has(p))return false;const st=pieceStats(S,p);return st.status!=="idle"&&st.req.val!==null});
+  // pass 1: partner gems for every gear slot first, so filler picks never take them
+  for(const p of active){
+    const avail=availMap(S,p);
+    for(const s of p.slots)if(s.row)avail[s.row]=Math.max(0,(avail[s.row]||0)-1);
+    const L=layoutFor(S,p.star).slots;
+    p.slots.forEach((s,i)=>{
+      const w=nk(s.want);if(!w||s.row||!slotOpen(S,p,i))return;
+      const r=S.inventory.filter(x=>avail[x.id]>0&&nk(x.name)===w&&slotAccepts(S,+L[i].star,+x.star))
+        .sort((a,b)=>(gemRes(S,b)-lambda*awakenCost(S,b))-(gemRes(S,a)-lambda*awakenCost(S,a))||awakenCost(S,a)-awakenCost(S,b))[0];
+      if(r){s.row=r.id;avail[r.id]--}
+    });
+  }
+  // pass 2: fill the rest to reach the infusion power
+  for(const p of active){
+    const st=pieceStats(S,p);
+    const avail=availMap(S,p);
+    for(const s of p.slots)if(s.row)avail[s.row]=Math.max(0,(avail[s.row]||0)-1);
+    const freeIdx=p.slots.map((s,i)=>s.row||!slotOpen(S,p,i)?-1:i).filter(i=>i>=0);
+    const c=chooseCombo(S,p,freeIdx,avail,(selfFed(p)?0:Math.max(0,st.req.val-st.gp)),lambda,Infinity,0);
+    if(c)for(const k in c.assign)p.slots[k].row=c.assign[k];
+  }
+  let cost=0,res=0;
+  for(const p of S.pieces){const st=pieceStats(S,p);p.looseUsed=st.cost;cost+=st.cost;res+=st.pieceRes}
+  return{cost,res};
+}
+function planScore(S){let sc=0,cost=0;for(const p of S.pieces){const st=pieceStats(S,p);cost+=st.cost;if(st.status==="ok")sc+=st.tier*TIER_W+st.res}return{sc,cost}}
+function fitPlan(S,lambda,orderBy,budget){
+  const skip=new Set();let r=planPass(S,lambda,skip,orderBy);
+  while(r.cost>budget){
+    let worst=null,wv=Infinity;
+    for(const p of S.pieces){if(skip.has(p))continue;const st=pieceStats(S,p);if(!st.cost)continue;const v=(st.status==="ok"?st.tier*TIER_W+st.res:0)/st.cost;if(v<wv){wv=v;worst=p}}
+    if(!worst)break;skip.add(worst);r=planPass(S,lambda,skip,orderBy);
+  }
+  // gear that ended up short gives nothing: free its gems
+  for(const p of S.pieces){const st=pieceStats(S,p);if(st.status==="short")p.slots.forEach(s=>{if(!s.locked)s.row=null})}
+  // try to bring dropped gear back with what is left, cheapest way first
+  for(const p of S.pieces){
+    const st0=pieceStats(S,p);if(st0.status!=="short")continue;
+    const left=budget-S.pieces.reduce((t,q)=>t+pieceStats(S,q).cost,0);
+    for(const [lam,force] of [[BIG_L,true],[0.2,true],[0,true],[BIG_L,false]]){
+      planOne(S,p,lam,force);
+      const st=pieceStats(S,p);
+      if(st.status==="ok"&&st.cost<=left)break;
+      p.slots.forEach(s=>{if(!s.locked)s.row=null});
+    }
+  }
+}
+const BIG_L=1e6;
+function planOne(S,p,lambda,force){
+  p.slots.forEach(s=>{if(!s.locked)s.row=null});
+  const avail=availMap(S,p);
+  for(const s of p.slots)if(s.row)avail[s.row]=Math.max(0,(avail[s.row]||0)-1);
+  const L=layoutFor(S,p.star).slots;
+  p.slots.forEach((s,i)=>{
+    const w=nk(s.want);if(!force||!w||s.row||!slotOpen(S,p,i))return;
+    const r=S.inventory.filter(x=>avail[x.id]>0&&nk(x.name)===w&&slotAccepts(S,+L[i].star,+x.star))
+      .sort((a,b)=>(gemRes(S,b)-lambda*awakenCost(S,b))-(gemRes(S,a)-lambda*awakenCost(S,a))||awakenCost(S,a)-awakenCost(S,b))[0];
+    if(r){s.row=r.id;avail[r.id]--}
+  });
+  const st=pieceStats(S,p);
+  const freeIdx=p.slots.map((s,i)=>s.row||!slotOpen(S,p,i)?-1:i).filter(i=>i>=0);
+  let c=chooseCombo(S,p,freeIdx,avail,(selfFed(p)?0:Math.max(0,st.req.val-st.gp)),lambda,Infinity,0);
+  if(!c){ // partners alone cannot reach the power: let every open slot be refilled freely
+    p.slots.forEach(s=>{if(!s.locked)s.row=null});
+    const st2=pieceStats(S,p),av2=availMap(S,p);
+    const fi=p.slots.map((s,i)=>s.row||!slotOpen(S,p,i)?-1:i).filter(i=>i>=0);
+    c=chooseCombo(S,p,fi,av2,(selfFed(p)?0:Math.max(0,st2.req.val-st2.gp)),lambda,Infinity,0);
+  }
+  if(c)for(const k in c.assign)p.slots[k].row=c.assign[k];
+}
+function topUp(S,budget){
+  let left=budget-S.pieces.reduce((t,p)=>t+pieceStats(S,p).cost,0);
+  for(const p of S.pieces.slice().sort((a,b)=>pieceStats(S,b).mainRes-pieceStats(S,a).mainRes)){
+    if(pieceStats(S,p).status!=="ok")continue;
+    const L=layoutFor(S,p.star).slots;
+    p.slots.forEach((s,si)=>{
+      if(s.row||!slotOpen(S,p,si))return;
+      const avail=availMap(S,null);
+      const want=nk(s.want);
+      const c=S.inventory.filter(x=>avail[x.id]>0&&slotAccepts(S,+L[si].star,+x.star)&&awakenCost(S,x)<=left)
+        .sort((a,b)=>((want&&nk(b.name)===want)-(want&&nk(a.name)===want))||gemRes(S,b)-gemRes(S,a)||awakenCost(S,a)-awakenCost(S,b))[0];
+      if(c){s.row=c.id;left-=awakenCost(S,c)}
+    });
+  }
+}
+/* aux gems: reserved, never socketed, awakened on their own with loose gem power */
+function auxRows(S){return (S.aux||[]).map(id=>id&&S.inventory.find(r=>r.id===id)).filter(Boolean)}
+function auxCost(S){return auxRows(S).reduce((t,r)=>t+awakenCost(S,r),0)}
+function runPlan(S,mode){
+  const budget=Math.max(0,(+S.settings.loose||0)-auxCost(S)),BIG=1e6;
+  const lambdas=mode==="min"?[BIG]:[BIG,2,1,0.5,0.3,0.2,0.1,0.06,0.03,0.01,0];
+  let best=null;
+  for(const orderBy of ["res","need"])for(const lam of lambdas){
+    fitPlan(S,lam,orderBy,budget);
+    if(mode!=="min")topUp(S,budget);
+    const r=planScore(S);
+    if(r.cost<=budget&&(!best||r.sc>best.sc||(r.sc===best.sc&&r.cost<best.cost)))best={sc:r.sc,cost:r.cost,snap:S.pieces.map(p=>p.slots.map(s=>s.row))};
+  }
+  if(best)S.pieces.forEach((p,i)=>p.slots.forEach((s,j)=>{s.row=best.snap[i][j]}));
+  for(const p of S.pieces)p.looseUsed=pieceStats(S,p).cost;
+}
+function smallestCover(S,star,need){
+  const t=S.worth[star]||[];for(let i=0;i<t.length;i++)if(+t[i]>=need)return{rank:i+1,power:+t[i]};return null;
+}
+/* ===== END CORE ===== */
+</script>
+<script>
+let S=defaultState(),db=null,docRef=null,saveTimer=null,writing=false,dirtyAgain=false,lastSaved="",renderTimer=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const starChip=s=>`<span class="st st${s}">${s}★</span>`;
+const qualTxt=r=>+r.star===5?`${r.quality||3}/5`:`${r.star}★`;
+function setSave(t){$("saveState").textContent=t}
+function normalize(x){
+  const d=defaultState();
+  if(!x||typeof x!=="object")return d;
+  const out=d;
+  if(x.settings){out.settings.loose=+x.settings.loose||0;if(["gems","power","none"].includes(x.settings.order))out.settings.order=x.settings.order;out.settings.allowHigher=!!x.settings.allowHigher;if(+x.settings.goal>=0&&x.settings.goal!==undefined)out.settings.goal=+x.settings.goal}
+  if(Array.isArray(x.inventory))out.inventory=x.inventory.map(r=>Object.assign({pct:0,quality:+r.star===5?3:"",power:""},r));
+  if(Array.isArray(x.pieces)&&x.pieces.length===8)out.pieces=x.pieces.map(p=>Object.assign({},p,{slots:(p.slots||[]).map(s=>({want:s.want||"",row:s.row||null,locked:!!s.locked}))}));
+  if(x.wants&&typeof x.wants==="object")out.wants=x.wants;
+  if(x.wantNames&&typeof x.wantNames==="object")out.wantNames=x.wantNames;
+  if(x.wantStars&&typeof x.wantStars==="object")out.wantStars=x.wantStars;
+  if(Array.isArray(x.aux))out.aux=x.aux.concat(Array(8).fill(null)).slice(0,8);
+  if(x.v>=2){for(const k of ["base","cum","worth","steps","layout","resRate","tiers"])if(x[k])out[k]=x[k]}
+  out.pieces.forEach(p=>ensureSlots(out,p));
+  return out;
+}
+function persist(){clearTimeout(saveTimer);setSave("Saving…");saveTimer=setTimeout(doSave,700)}
+async function doSave(){
+  const body=JSON.stringify(S);
+  if(body===lastSaved){setSave("Saved");return}
+  if(docRef){
+    if(writing){dirtyAgain=true;return}
+    writing=true;
+    try{await docRef.set({state:body,updated:new Date().toISOString()});lastSaved=body;setSave("Saved")}
+    catch(e){setSave(e&&e.code==="invalid_argument"?"Read-only: changes not saved":"Not saved, will retry on next change")}
+    writing=false;if(dirtyAgain){dirtyAgain=false;doSave()}
+  }else{
+    try{localStorage.setItem("di-gem-planner",body);lastSaved=body;setSave("Saved in this browser")}catch(e){setSave("Not saved")}
+  }
+}
+function change(fn){fn();persist();scheduleRender()}
+function scheduleRender(){clearTimeout(renderTimer);renderTimer=setTimeout(render,0)}
+
+/* ===== goal paths: rough "what's missing" estimates, not an exact plan ===== */
+function curTotals(){let res=0,cost=0;for(const p of S.pieces){const st=pieceStats(S,p);res+=st.pieceRes;cost+=st.cost}return{res,cost:cost+auxCost(S)}}
+function upInfo(star,rank,pct){ // copies (rank-1 copies of the same gem) and gem power to reach next rank
+  const c=S.cum[star],w=S.worth[star],b=+S.base[star]||1;if(!c||rank>=10)return null;
+  const left=1-(+pct||0)/100,dc=(+c[rank])-(+c[rank-1]),dw=(+w[rank])-(+w[rank-1]);
+  return{copies:Math.max(1,Math.ceil((dw-dc)/b*left-1e-9)),gp:Math.ceil(dc*left)};
+}
+function goalCandidates(){
+  const out=[];
+  S.pieces.forEach(p=>{
+    const st=pieceStats(S,p);if(st.status==="idle"||!p.mainRow||+p.star!==5)return;
+    const u=upInfo(5,+p.rank,p.pct);if(!u)return;
+    const nr=+p.rank+1,gain=mainResOf(S,5,p.quality,nr,0)-st.mainRes;
+    const L=layoutFor(S,5).slots;let extra=0,extraGp=0,extraId=null,note="";
+    L.forEach((ls,i)=>{if(+ls.unlock===nr){const w=nk((p.slots[i]||{}).want);const av=availMap(S,null);
+      const cand=S.inventory.filter(r=>av[r.id]>0&&+r.star===+ls.star).sort((a,b)=>((nk(b.name)===w)-(nk(a.name)===w))||gemRes(S,b)-gemRes(S,a))[0];
+      if(cand){extra+=gemRes(S,cand);extraGp+=awakenCost(S,cand);extraId=cand.id;note=`opens S${i+1} (${cand.name} R${clampRank(cand.rank)})`}else note=`opens S${i+1}`}});
+    // bigger rank needs more resonant power; cover the gap with roughly 0.8 gem power per point
+    const newReq=(+S.cum[5][nr-1]),gapPow=Math.max(0,newReq-st.gp);
+    out.push({kind:"main",key:"m:"+p.id,label:`${p.name} R${p.rank}${+p.pct?" +"+p.pct+"%":""} → R${nr}`,gem:p.name,star:5,copies:u.copies,gp:u.gp+extraGp+Math.ceil(gapPow*0.8),res:gain+extra,note,extra,extraGp,extraId});
+  });
+  S.pieces.forEach(p=>{const st=pieceStats(S,p);if(st.status!=="ok")return;
+    p.slots.forEach((s,i)=>{if(!s.row)return;const r=S.inventory.find(x=>x.id===s.row);if(!r||+r.rank>=10)return;
+      const u=upInfo(+r.star,+r.rank,r.pct);if(!u)return;
+      const rate=+r.star===5?(+S.resRate["q"+(r.quality||3)]||10):(+S.resRate[r.star]||0);
+      const partner=nk(r.name)===nk(s.want);
+      out.push({kind:+r.star===5?"slot5":"slot2",key:"s:"+r.id+":"+p.id+":"+i,label:`${r.name} R${r.rank}${+r.pct?" +"+r.pct+"%":""} → R${+r.rank+1} (${p.name} S${i+1})`,gem:r.name,star:+r.star,copies:u.copies,gp:u.gp,res:Math.round(rate),note:partner?"partner":""});
+    });});
+  return out;
+}
+function goalPath(filter,weight){
+  const cur=curTotals(),goal=+S.settings.goal||0;let need=goal-cur.res;
+  const cands=goalCandidates().filter(filter),picked=[];
+  const score=c=>c.res/Math.max(1,weight(c));
+  const usedExtra=new Set();
+  while(need>0&&cands.length&&picked.length<14){
+    for(const c of cands)if(c.extraId&&usedExtra.has(c.extraId)){c.res-=c.extra;c.gp-=c.extraGp;c.note=c.note.replace(/ \(.*\)$/,"")+" (no spare 5★ left for it)";c.extraId=null}
+    cands.sort((a,b)=>score(b)-score(a));const c=cands.shift();if(c.res<=0)continue;picked.push(c);need-=c.res;if(c.extraId)usedExtra.add(c.extraId);
+  }
+  const copies={},t={gp:0,res:0,c5:0,c2:0};
+  for(const c of picked){t.gp+=c.gp;t.res+=c.res;if(c.star===5)t.c5+=c.copies;else t.c2+=c.copies;const k=c.gem+" ("+c.star+"★)";copies[k]=(copies[k]||0)+c.copies}
+  const shortNow=Math.max(0,cur.cost-(+S.settings.loose||0));
+  return{picked,copies,t,reached:need<=0,end:cur.res+t.res,shortNow};
+}
+function renderGoal(){
+  const goal=+S.settings.goal||0;$("goalRes").value=goal||"";
+  const cur=curTotals();
+  $("goalSummary").textContent=goal?(cur.res>=goal?`${goal.toLocaleString()} reached`:`${goal.toLocaleString()} · missing ${(goal-cur.res).toLocaleString()}`):"none set";
+  if(!goal){$("goalOut").innerHTML=`<p class="hint">Set a goal to see what it would take.</p>`;return}
+  if(cur.res>=goal){$("goalOut").innerHTML=`<p class="hint">The saved plan already reaches ${cur.res.toLocaleString()} resonance.</p>`;return}
+  const paths=[
+    ["Rank up main gems",c=>c.kind==="main",c=>c.copies*150+c.gp],
+    ["Rank up gems in slots",c=>c.kind!=="main",c=>(c.star===5?c.copies*150:c.copies*20)+c.gp],
+    ["Best mix",c=>true,c=>(c.star===5?c.copies*150:c.copies*20)+c.gp]
+  ].map(([name,f,w])=>({name,...goalPath(f,w)}));
+  $("goalOut").innerHTML=`<p class="note">Now <span class="num">${cur.res.toLocaleString()}</span>, goal <span class="num">${goal.toLocaleString()}</span>, missing <span class="num st">${(goal-cur.res).toLocaleString()}</span>. Rough estimates to aim at, not an exact plan. Copies are rank 1 copies of that same gem (2★ copies can come from telluric fragments, 80 each).</p>
+  <div class="goalgrid">${paths.map(pa=>`<div class="goalcard">
+    <h3>${pa.name}</h3>
+    <div class="big num">${pa.reached?"Reaches":"Gets to"} ${pa.end.toLocaleString()}</div>
+    <div class="row" style="gap:6px 14px"><span><span class="num st">${pa.t.c5}</span> <span class="hint">5★ copies</span></span><span><span class="num st">${pa.t.c2}</span> <span class="hint">2★ copies</span></span><span><span class="num st">${(pa.t.gp+pa.shortNow).toLocaleString()}</span> <span class="hint">more gem power${pa.shortNow?` (incl. ${pa.shortNow.toLocaleString()} for the saved plan)`:""}</span></span></div>
+    ${pa.picked.length?`<ol class="steps">${pa.picked.map(c=>`<li><span>${esc(c.label)}</span><span class="hint num">${c.copies}× copy · ${c.gp.toLocaleString()} GP · +${c.res}${c.note?" · "+esc(c.note):""}</span></li>`).join("")}</ol>`:`<p class="hint">Nothing to rank up here.</p>`}
+    ${pa.reached?"":`<p class="hint">Not enough on this path alone.</p>`}
+  </div>`).join("")}</div>`;
+}
+function renderAux(){
+  const u=usageMap(S,null);
+  $("auxGrid").innerHTML=(S.aux||[]).map((id,i)=>{
+    const cur=id&&S.inventory.find(r=>r.id===id);
+    const opts=S.inventory.filter(r=>r.id===id||((+r.count||0)-(u[r.id]||0))>0).sort((a,b)=>b.star-a.star||rowMainRes(S,b)-rowMainRes(S,a)).map(r=>`<option value="${r.id}" ${r.id===id?"selected":""}>${esc(`${qualTxt(r)} R${clampRank(r.rank)}${+r.pct?` +${r.pct}%`:""} ${r.name}`)}</option>`).join("");
+    return `<div class="row" style="gap:6px;flex-wrap:nowrap"><span class="lbl" style="min-width:3.5em">Aux ${i+1}</span><select id="ax-${i}" class="auxSel" data-i="${i}" style="flex:1 1 auto;min-width:0" aria-label="Aux gem ${i+1}"><option value="">— none —</option>${opts}</select><span class="hint num" style="white-space:nowrap">${cur?(cur.awakened?"awake":awakenCost(S,cur).toLocaleString()+" GP"):""}</span></div>`;
+  }).join("");
+  const n=auxRows(S).length,c=auxCost(S);
+  $("auxSummary").textContent=n?`${n} reserved · ${c.toLocaleString()} gem power to awaken them`:"None reserved";
+}
+function renderStrip(){
+  let ok=0,act=0,gems=0,res=0,maxRes=0,loose=0,mainRes=0,okRes=0,tiers=0,tierMax=0;
+  for(const p of S.pieces){const st=pieceStats(S,p);if(st.status!=="idle"){act++;res+=st.res;maxRes+=st.maxRes;mainRes+=st.mainRes;tiers+=st.status==="ok"?st.tier:0;tierMax+=st.tierMax}if(st.status==="ok"){ok++;okRes+=st.pieceRes}gems+=st.used;loose+=st.loose}
+  const invTotal=S.inventory.reduce((t,r)=>t+(+r.count||0),0);
+  const pool=+S.settings.loose||0,ax=auxCost(S);loose+=ax;
+  $("strip").innerHTML=`
+   <div><span class="lbl">Total resonance</span><span class="big">${(mainRes+res).toLocaleString()}</span><span class="hint">${mainRes.toLocaleString()} main gems + ${res.toLocaleString()} resonant · ${okRes.toLocaleString()} on infused gear</span></div>
+   <div><span class="lbl">Bonus tiers reached</span><span class="big">${tiers} / ${tierMax}</span><span class="hint">Set Awakening bonuses on infused gear</span></div>
+   <div><span class="lbl">Infused</span><span class="big">${ok} / ${act||0}</span><span class="hint">gear slots with a main gem</span></div>
+   <div><span class="lbl">Gem power needed</span><span class="big" style="${loose>pool?"color:var(--bad)":""}">${loose.toLocaleString()}</span><span class="hint">you have ${pool.toLocaleString()}${loose>pool?` · short ${(loose-pool).toLocaleString()}`:` · ${(pool-loose).toLocaleString()} spare`}${ax?` · aux ${ax.toLocaleString()}`:""}</span></div>`;
+}
+function rowLabel(r,avail){const p=+r.pct?` +${r.pct}%`:"";return `${qualTxt(r)} R${clampRank(r.rank)}${p} ${r.name||"(unnamed)"} · ${gemPower(S,r).toLocaleString()} GP · ${gemRes(S,r)} res · awaken ${awakenCost(S,r).toLocaleString()}${avail!==undefined?` · ${avail} free`:""}`}
+function renderGear(){
+  $("gear").innerHTML=S.pieces.map((p,pi)=>{
+    ensureSlots(S,p);
+    const st=pieceStats(S,p),L=layoutFor(S,p.star).slots;
+    const availOthers=availMap(S,p);
+    const pill=st.status==="ok"?`<span class="pill ok">Infuses${st.surplus?` · +${st.surplus.toLocaleString()} spare`:""}</span>`:st.status==="short"?`<span class="pill short">Short ${st.short.toLocaleString()} GP</span>`:st.status==="needreq"?`<span class="pill warn">Set rank</span>`:`<span class="pill idle">Not set</span>`;
+    const reqHint=st.req.src==="calc"?"calculated":st.req.src==="estimate"?"estimated, step size for this rank unknown":st.req.src==="entered"?"entered by hand":"";
+    const slots=p.slots.map((s,i)=>{
+      const lay=L[i];
+      if(!slotOpen(S,p,i))return `<div class="slot closed"><div class="tag">S${i+1}<br>${starChip(lay.star)}</div><div class="ctl hint">Opens at main gem rank ${lay.unlock}</div><div></div></div>`;
+      const ownCount={};p.slots.forEach((x,j)=>{if(x.row&&j!==i)ownCount[x.row]=(ownCount[x.row]||0)+1});
+      const opts=S.inventory.filter(r=>slotAccepts(S,+lay.star,+r.star)).sort((a,b)=>gemPower(S,b)-gemPower(S,a)).map(r=>{
+        const free=(availOthers[r.id]||0)-(ownCount[r.id]||0),sel=s.row===r.id;
+        if(free<=0&&!sel)return"";
+        return `<option value="${r.id}" ${sel?"selected":""}>${esc(rowLabel(r,free-(sel?1:0)))}</option>`;
+      }).join("");
+      const r=s.row?S.inventory.find(x=>x.id===s.row):null;
+      let sugg="";const want=(s.want||"").trim();
+      if(want&&r&&nk(r.name)===nk(want)){sugg=`<span class="pill ok">Partner gem ✓</span>`}else if(want&&(!r||nk(r.name)!==nk(want))){
+        const has=S.inventory.find(x=>nk(x.name)===nk(want)&&slotAccepts(S,+lay.star,+x.star)&&((availOthers[x.id]||0)-(ownCount[x.id]||0))>0);
+        sugg=has?`<span class="sugg">Swap in ${esc(has.name)} R${clampRank(has.rank)} (in inventory)</span>`:`<span class="sugg get">Get ${esc(want)} for this slot</span>`;
+      }else if(!r&&st.status==="short"){
+        const c=smallestCover(S,lay.star,st.short);
+        sugg=c?`<span class="sugg get">A ${lay.star}★ R${c.rank}+ (${c.power.toLocaleString()} GP) would close the gap</span>`:`<span class="sugg get">Any ${lay.star}★ gem adds power</span>`;
+      }
+      const isP=r&&want&&nk(r.name)===nk(want);
+      return `<div class="slot ${isP?"partner":(r&&want?"offpartner":"")}">
+        <div class="tag">S${i+1}<br>${starChip(lay.star)}</div>
+        <div class="ctl">
+          <select id="sl-${pi}-${i}" data-pi="${pi}" data-si="${i}" class="slotSel" aria-label="${esc(p.label)} slot ${i+1} gem"><option value="">— empty —</option>${opts}</select>
+          <label class="lock" for="lk-${pi}-${i}"><input type="checkbox" id="lk-${pi}-${i}" class="lockBox" data-pi="${pi}" data-si="${i}" ${s.locked?"checked":""}>Lock</label>
+        </div>
+        <div class="ctl">
+          <input class="want" id="wt-${pi}-${i}" data-pi="${pi}" data-si="${i}" list="dl-${lay.star}" placeholder="Partner gem for this slot" value="${esc(s.want)}" aria-label="${esc(p.label)} slot ${i+1} required gem">
+          <span class="meta">${r?gemIcon(r.name,22):""}<span class="num">+${(r?gemPower(S,r):0).toLocaleString()} GP</span><span class="num">+${slotRes(S,p,i)} res</span>${r&&!r.awakened?`<span class="num">awaken ${awakenCost(S,r).toLocaleString()}</span>`:""}</span>
+          ${sugg}
+        </div>
+      </div>`;
+    }).join("");
+    const pwPct=st.req.val?Math.min(100,st.total/st.req.val*100):0;
+    const tTop=st.tierMax?+((S.tiers[p.star]||[])[st.tierMax-1]):st.maxRes;const resPct=tTop?Math.min(100,st.matchRes/tTop*100):0;
+    return `<article class="card">
+      <header><h3>${esc(p.label)}</h3>${pill}</header>
+      <div class="main">
+        <div class="req">
+          <select id="mi-${pi}" data-pi="${pi}" class="mainSel" style="flex:1 1 220px" aria-label="${esc(p.label)} main gem from inventory"><option value="">Main gem: typed in by hand</option>${S.inventory.filter(r=>((availOthers[r.id]||0)+(p.mainRow===r.id?1:0))>0).sort((a,b)=>rowMainRes(S,b)-rowMainRes(S,a)).map(r=>`<option value="${r.id}" ${p.mainRow===r.id?"selected":""}>${esc(`${qualTxt(r)} R${clampRank(r.rank)}${+r.pct?` +${r.pct}%`:""} ${r.name} · ${rowMainRes(S,r)} res as main`)}</option>`).join("")}</select>
+          <label class="lock" for="mk-${pi}"><input type="checkbox" id="mk-${pi}" class="mainKeep" data-pi="${pi}" ${p.mainLocked?"checked":""}>Keep</label>
+        </div>
+        <div class="mainline">${p.name?gemIcon(p.name,36):""}<span class="gname">${p.name?esc(p.name):"No main gem"}</span>${p.rank!==""?`<span class="num">${+p.star===5?(p.quality||3)+"/5":p.star+"★"} R${p.rank}${+p.pct?" +"+p.pct+"%":""}</span>`:""}<span class="hint">needs <span class="num st">${st.req.val!==null?st.req.val.toLocaleString():"–"}</span> power${st.req.src==="estimate"?" (estimated)":st.req.src==="entered"?" (entered)":""}</span></div>
+        <details class="edit"><summary>Edit by hand</summary><div class="main">
+        <div class="f"><span class="lbl">Main gem</span><input id="mn-${pi}" data-pi="${pi}" data-k="name" list="dl-${p.star}" value="${esc(p.name)}" placeholder="Gem name" ${p.mainRow?"disabled":""}></div>
+        <div class="f"><span class="lbl">Star</span><select id="ms-${pi}" data-pi="${pi}" data-k="star" ${p.mainRow?"disabled":""}><option value="1" ${p.star==1?"selected":""}>1★</option><option value="2" ${p.star==2?"selected":""}>2★</option><option value="5" ${p.star==5?"selected":""}>5★</option></select>${+p.star===5?`<select id="mqq-${pi}" data-pi="${pi}" data-k="quality" aria-label="Quality" ${p.mainRow?"disabled":""}>${[2,3,4,5].map(v=>`<option value="${v}" ${+(p.quality||3)===v?"selected":""}>${v}/5</option>`).join("")}</select>`:""}</div>
+        <div class="f"><span class="lbl">Rank</span><input id="mr-${pi}" data-pi="${pi}" data-k="rank" type="number" min="1" max="10" value="${esc(p.rank)}" ${p.mainRow?"disabled":""}></div>
+        <div class="f"><span class="lbl">%</span><input id="mp-${pi}" data-pi="${pi}" data-k="pct" type="number" min="0" max="99" value="${esc(p.pct)}" ${p.mainRow?"disabled":""}></div>
+        <div class="req">
+          <span class="lbl">GP to infuse</span><span class="num st">${st.req.val!==null?st.req.val.toLocaleString():"–"}</span><span class="hint">${reqHint}</span>
+          <label class="hint row" for="mq-${pi}" style="gap:4px;margin-left:auto">Override <input id="mq-${pi}" data-pi="${pi}" data-k="reqOverride" type="number" min="0" value="${esc(p.reqOverride)}" style="width:5.5em"></label>
+        </div>
+        </div></details>
+      </div>
+      <div class="slots">${slots}</div>
+      <div class="foot">
+        <div class="row" style="justify-content:space-between"><span class="hint">${st.selfFed?`Fed directly: <span class="num">${st.feed.toLocaleString()}</span> gem power`:`Resonant power <span class="num">${st.gp.toLocaleString()}</span>`} / <span class="num">${st.req.val!==null?st.req.val.toLocaleString():"?"}</span></span><span class="hint">${st.used} of ${st.open} slots · awaken cost ${st.cost.toLocaleString()}</span></div>
+        <div class="bar pw ${st.status==="short"?"short":""}"><i style="width:${pwPct}%"></i></div>
+        <div class="row" style="justify-content:space-between"><span class="hint">Resonance <span class="num">${st.mainRes} main + ${st.res} slots = ${st.pieceRes}</span> · partner resonance <span class="num">${st.matchRes}</span> · bonus tier <span class="num st">${st.tier}/${st.tierMax}</span>${st.nextTier!==null?` (next at ${st.nextTier}, +${st.nextTier-st.matchRes})`:""}</span><button class="small ghost clearPiece" data-pi="${pi}">Clear slots</button></div>
+        <div class="bar"><i style="width:${resPct}%"></i></div>
+      </div>
+    </article>`;
+  }).join("");
+}
+const CK={q:"",star:0,owned:false,tab:"check",newStar:5};
+function ckNames(){
+  const m=new Map();
+  for(const st of [5,2,1])for(const n of GEM_NAMES[st])m.set(nk(n)+"|"+st,{name:n,star:st});
+  for(const r of S.inventory)if(!m.has(nk(r.name)+"|"+r.star))m.set(nk(r.name)+"|"+r.star,{name:r.name,star:+r.star});
+  for(const k of Object.keys(S.wantNames||{})){const st=starOfKey(k);if(!m.has(k+"|"+st))m.set(k+"|"+st,{name:S.wantNames[k],star:st})}
+  return [...m.values()];
+}
+function pctStep(star,rank){const st=stepFor(S,star,rank);return st?+st.pct:10}
+function renderChecklist(){
+  document.querySelectorAll(".ckStar").forEach(b=>b.classList.toggle("on",+b.dataset.s===CK.star));
+  document.querySelectorAll(".ckNewStar").forEach(b=>b.classList.toggle("on",+b.dataset.s===CK.newStar));
+  $("ckOwned").checked=CK.owned;
+  const q=nk(CK.q),u=usageMap(S,null);
+  const list=ckNames().filter(g=>(!CK.star||g.star===CK.star)&&(!q||nk(g.name).includes(q)))
+    .map(g=>({...g,rows:S.inventory.filter(r=>nk(r.name)===nk(g.name)&&+r.star===g.star)}))
+    .filter(g=>!CK.owned||g.rows.length)
+    .sort((a,b)=>b.star-a.star||(b.rows.length>0)-(a.rows.length>0)||a.name.localeCompare(b.name));
+  $("checkList").innerHTML=list.map(g=>{
+    const qty=g.rows.reduce((t,r)=>t+(+r.count||0),0);
+    const copies=g.rows.map(r=>{
+      const rk=clampRank(r.rank),pc=+r.pct||0,used=u[r.id]||0;
+      const stars=+r.star===5?`<span class="qstars" role="group" aria-label="Quality">${[1,2,3,4,5].map(i=>`<button class="qs ${i<=(+r.quality||3)?"on":""}" data-act="q" data-v="${i}" data-id="${r.id}" aria-label="${i} of 5 stars" ${i<2?"disabled":""}>★</button>`).join("")}</span>`:"";
+      return `<div class="copy">
+        ${stars}
+        <span class="step"><button data-act="rank-" data-id="${r.id}" aria-label="Rank down">−</button><span class="val num">R${rk}</span><button data-act="rank+" data-id="${r.id}" aria-label="Rank up">+</button></span>
+        <span class="step"><button data-act="pct-" data-id="${r.id}" aria-label="Percent down">−</button><span class="val num">${pc}%</span><button data-act="pct+" data-id="${r.id}" aria-label="Percent up">+</button></span>
+        <span class="step"><button data-act="qty-" data-id="${r.id}" aria-label="Fewer">−</button><span class="val num">×${+r.count||0}</span><button data-act="qty+" data-id="${r.id}" aria-label="More">+</button></span>
+        <button class="tog ${r.awakened?"on":""}" data-act="awake" data-id="${r.id}" aria-pressed="${!!r.awakened}">Awake</button>
+        ${used?`<span class="hint">in use ${used}</span>`:""}
+      </div>`}).join("");
+    return `<div class="ckgem ${g.rows.length?"owned":""}">
+      <div class="ckhead">${gemIcon(g.name,32)}<span class="st st${g.star}">${g.star}★</span><span class="ckname">${esc(g.name)}</span>${qty?`<span class="hint num">${qty} owned</span>`:""}<button class="small addCopy" data-name="${esc(g.name)}" data-star="${g.star}">+ ${g.rows.length?"Another":"Add"}</button></div>
+      ${copies}
+    </div>`}).join("")||`<p class="hint">No gems match.</p>`;
+}
+function ckAct(act,id){
+  const r=S.inventory.find(x=>x.id===id);if(!r)return;
+  const rk=clampRank(r.rank),pc=+r.pct||0,sp=pctStep(+r.star,rk);
+  if(act==="rank+"&&rk<10){r.rank=rk+1;r.pct=0}
+  else if(act==="rank-"&&rk>1){r.rank=rk-1;r.pct=0}
+  else if(act==="pct+"){let n=Math.round((pc+sp)*100)/100;if(n>=100){if(rk<10){r.rank=rk+1;r.pct=0}}else r.pct=Math.round(n)}
+  else if(act==="pct-"){r.pct=Math.max(0,Math.round(pc-sp))}
+  else if(act==="qty+")r.count=(+r.count||0)+1;
+  else if(act==="qty-"){r.count=(+r.count||0)-1;if(r.count<=0){S.inventory=S.inventory.filter(x=>x.id!==id);S.pieces.forEach(p=>{if(p.mainRow===id){p.mainRow=null;p.mainLocked=false}p.slots.forEach(s=>{if(s.row===id){s.row=null;s.locked=false}})});S.aux=(S.aux||[]).map(a=>a===id?null:a)}}
+  else if(act==="awake")r.awakened=!r.awakened;
+  delete r.example;
+}
+function ckSetQuality(id,v){const r=S.inventory.find(x=>x.id===id);if(r&&v>=2)r.quality=v}
+/* backup */
+async function exportBackup(){
+  const data=JSON.stringify({app:"gem-awakening-planner",version:2,exported:new Date().toISOString(),state:S},null,1);
+  const name="gem-planner-backup-"+new Date().toISOString().slice(0,10)+".json";
+  let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null}catch(e){}
+  if(dl){try{await dl.save({filename:name,data});$("backupMsg").innerHTML=`<p class="hint">Backup saved.</p>`}catch(e){$("backupMsg").innerHTML=`<p class="hint">${e&&e.code==="declined"?"Save cancelled.":"Could not save the file here."}</p>`}return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=name;document.body.appendChild(a);a.click();a.remove();$("backupMsg").innerHTML=`<p class="hint">Backup downloaded.</p>`}
+  catch(e){$("backupMsg").innerHTML=`<p class="hint">Could not save a file here.</p>`}
+}
+let pendingImport=null;
+function readImport(file){
+  const fr=new FileReader();
+  fr.onload=()=>{try{const j=JSON.parse(fr.result);const st=j.state||j;if(!Array.isArray(st.inventory))throw 0;pendingImport=st;
+    const n=st.inventory.reduce((t,r)=>t+(+r.count||0),0);
+    $("backupMsg").innerHTML=`<div class="flag example"><span>Backup has ${n} gems${j.exported?` (saved ${esc(String(j.exported).slice(0,10))})`:""}. This replaces what is here now.</span><button class="small" id="impInv">Replace inventory only</button><button class="small" id="impAll">Replace everything</button><button class="small ghost" id="impCancel">Cancel</button></div>`}
+    catch(e){pendingImport=null;$("backupMsg").innerHTML=`<p class="hint">That file is not a planner backup.</p>`}};
+  fr.readAsText(file);
+}
+function renderInventory(){
+  const u=usageMap(S,null);
+  const where={};(S.aux||[]).forEach((a,i)=>{if(a)(where[a]=where[a]||[]).push(`Aux ${i+1}`)});S.pieces.forEach(p=>{if(p.mainRow)(where[p.mainRow]=where[p.mainRow]||[]).push(`${p.label} main`);p.slots.forEach((s,i)=>{if(s.row)(where[s.row]=where[s.row]||[]).push(`${p.label} S${i+1}`)})});
+  const rows=S.inventory.slice().sort((a,b)=>a.star-b.star||gemPower(S,b)-gemPower(S,a)||a.name.localeCompare(b.name));
+  $("invTable").innerHTML=`<thead><tr><th>Gem</th><th>Star</th><th>Quality</th><th class="n">Rank</th><th class="n">%</th><th class="n">Qty</th><th>Awake</th><th class="n">Awaken cost</th><th class="n">GP each</th><th class="n">Res in slot</th><th class="n">Res as main</th><th class="n">Free</th><th>Socketed in</th><th></th></tr></thead><tbody>${
+    rows.length?rows.map(r=>{const used=u[r.id]||0,free=(+r.count||0)-used;
+      const q=+r.star===5?`<select id="iq-${r.id}" data-id="${r.id}" data-k="quality" aria-label="Quality">${[2,3,4,5].map(v=>`<option value="${v}" ${+(r.quality||3)===v?"selected":""}>${v}/5</option>`).join("")}</select>`:`<span class="hint">–</span>`;
+      return `<tr class="${free<=0?"zero":""}">
+        <td><input id="in-${r.id}" data-id="${r.id}" data-k="name" list="dl-${r.star}" value="${esc(r.name)}" aria-label="Gem name"></td>
+        <td><select id="is-${r.id}" data-id="${r.id}" data-k="star" aria-label="Star"><option value="1" ${r.star==1?"selected":""}>1★</option><option value="2" ${r.star==2?"selected":""}>2★</option><option value="5" ${r.star==5?"selected":""}>5★</option></select></td>
+        <td>${q}</td>
+        <td class="n"><input id="ir-${r.id}" data-id="${r.id}" data-k="rank" type="number" min="1" max="10" value="${esc(r.rank)}" aria-label="Rank"></td>
+        <td class="n"><input id="ix-${r.id}" data-id="${r.id}" data-k="pct" type="number" min="0" max="99" value="${esc(r.pct||0)}" aria-label="Percent"></td>
+        <td class="n"><input id="ic-${r.id}" data-id="${r.id}" data-k="count" type="number" min="0" value="${esc(r.count)}" aria-label="Quantity"></td>
+        <td><input type="checkbox" id="ia-${r.id}" data-id="${r.id}" data-k="awakened" ${r.awakened?"checked":""} aria-label="Awakened"></td><td class="n">${awakenCost(S,r).toLocaleString()}</td>
+        <td class="n"><input id="ip-${r.id}" data-id="${r.id}" data-k="power" type="number" min="0" value="${esc(r.power??"")}" placeholder="${gemPower(S,Object.assign({},r,{power:""}))}" aria-label="Gem power override" style="width:5.5em"></td>
+        <td class="n">${gemRes(S,r)}</td><td class="n">${rowMainRes(S,r)}</td>
+        <td class="n">${free<0?`<span class="st" style="color:var(--bad)">${free}</span>`:free}</td>
+        <td class="hint">${esc((where[r.id]||[]).join(", "))}</td>
+        <td><button class="small ghost delRow" data-id="${r.id}" aria-label="Remove ${esc(r.name)}">Remove</button></td></tr>`}).join("")
+    :`<tr><td colspan="14" class="hint">No gems yet. Add them above, or paste a list under Bulk import.</td></tr>`}</tbody>`;
+  const tot=S.inventory.reduce((t,r)=>t+(+r.count||0),0),usedT=Object.values(u).reduce((a,b)=>a+b,0);
+  const by={1:0,2:0,5:0};S.inventory.forEach(r=>by[r.star]=(by[r.star]||0)+(+r.count||0));
+  $("invSummary").textContent=`${tot} gems (${by[1]} 1★, ${by[2]} 2★, ${by[5]} 5★), ${usedT} socketed`;
+  $("exampleBanner").innerHTML=S.inventory.some(r=>r.example)?`<div class="flag example"><span>Rows marked as examples are placeholders, not your gems.</span><button class="small" id="clearEx">Remove example gems</button></div>`:"";
+  $("addQual").hidden=$("addStar").value!=="5";
+}
+function renderRules(){
+  $("allowHigher").checked=!!S.settings.allowHigher;
+  $("rankTable").innerHTML=`<thead><tr><th>Star</th><th></th>${[...Array(10)].map((_,i)=>`<th class="n">R${i+1}</th>`).join("")}</tr></thead><tbody>${[1,2,5].flatMap(s=>[
+    `<tr><td>${starChip(s)}</td><td class="hint">GP to infuse</td>${S.cum[s].map((v,i)=>`<td class="n"><input id="cu-${s}-${i}" data-t="cum" data-s="${s}" data-i="${i}" class="tabIn" type="number" min="0" value="${esc(v)}" aria-label="${s} star rank ${i+1} GP to infuse" style="width:5em"></td>`).join("")}</tr>`,
+    `<tr><td></td><td class="hint">Worth</td>${S.worth[s].map((v,i)=>`<td class="n"><input id="wo-${s}-${i}" data-t="worth" data-s="${s}" data-i="${i}" class="tabIn" type="number" min="0" value="${esc(v)}" aria-label="${s} star rank ${i+1} worth" style="width:5em"></td>`).join("")}</tr>`]).join("")}</tbody>`;
+  $("stepTable").innerHTML=`<thead><tr><th>Star</th><th class="n">From rank</th><th class="n">% per step</th><th class="n">GP per step</th><th class="n">Steps</th><th></th></tr></thead><tbody>${S.steps.map((r,i)=>`<tr>
+    <td><select id="ss-${i}" class="stepIn" data-i="${i}" data-k="star" aria-label="Star"><option value="1" ${r.star==1?"selected":""}>1★</option><option value="2" ${r.star==2?"selected":""}>2★</option><option value="5" ${r.star==5?"selected":""}>5★</option></select></td>
+    <td class="n"><input id="sr-${i}" class="stepIn" data-i="${i}" data-k="rank" type="number" min="1" max="9" value="${esc(r.rank)}" aria-label="From rank"></td>
+    <td class="n"><input id="sp-${i}" class="stepIn" data-i="${i}" data-k="pct" type="number" min="0" step="0.01" value="${esc(r.pct)}" aria-label="Percent per step"></td>
+    <td class="n"><input id="sg-${i}" class="stepIn" data-i="${i}" data-k="gp" type="number" min="0" value="${esc(r.gp)}" aria-label="GP per step"></td>
+    <td class="n">${+r.pct>0?Math.ceil(100/(+r.pct)-0.01):"–"}</td>
+    <td><button class="small ghost delStep" data-i="${i}">Remove</button></td></tr>`).join("")}</tbody>`;
+  $("layoutEd").innerHTML=[1,2,5].map(ms=>{const L=S.layout[ms];return `<div class="tbl" style="margin-bottom:8px"><table><thead><tr><th>Main ${starChip(ms)}</th>${L.slots.map((_,i)=>`<th>S${i+1}</th>`).join("")}</tr></thead><tbody>
+    <tr><td class="hint">Gem star</td>${L.slots.map((x,i)=>`<td><select id="ls-${ms}-${i}" class="layIn" data-ms="${ms}" data-i="${i}" data-k="star" aria-label="Slot ${i+1} star"><option value="1" ${x.star==1?"selected":""}>1★</option><option value="2" ${x.star==2?"selected":""}>2★</option><option value="5" ${x.star==5?"selected":""}>5★</option></select></td>`).join("")}</tr>
+    <tr><td class="hint">Opens at rank</td>${L.slots.map((x,i)=>`<td><input id="lu-${ms}-${i}" class="layIn" data-ms="${ms}" data-i="${i}" data-k="unlock" type="number" min="1" max="10" value="${esc(x.unlock)}" aria-label="Slot ${i+1} unlock rank" style="width:4em"></td>`).join("")}</tr></tbody></table></div>`}).join("")+`<p class="note">5★ unlock ranks checked in game. 1★ and 2★ unlock ranks are not known yet, so those slots are treated as open from rank 1.</p>`;
+  $("tierEd").innerHTML=`<div class="row">${[1,2,5].map(st=>`<label class="row" for="tr-${st}" style="gap:4px"><span class="hint">Main ${st}★</span><input id="tr-${st}" class="tierIn" data-st="${st}" value="${esc(((S.tiers||{})[st]||[]).join(", "))}" style="width:11em"></label>`).join("")}</div><p class="note">5★ from di-tools.info (20, 40, 60, 160, 260). 1★ from the Ultimate Gem Guide (10, 20). 2★ is a guess, so please check it.</p>`;
+  const rr=[["1","1★"],["2","2★"],["q2","5★ 2/5"],["q3","5★ 3/5"],["q4","5★ 4/5"],["q5","5★ 5/5"]];
+  $("resEd").innerHTML=`<div class="row">${rr.map(([k,l])=>`<label class="row" for="rr-${k}" style="gap:4px"><span class="hint">${l}</span><input id="rr-${k}" class="resIn" data-k="${k}" type="number" step="0.5" min="0" value="${esc(S.resRate[k])}" style="width:4.5em"></label>`).join("")}</div>`;
+}
+function render(){
+  const a=document.activeElement,aid=a&&a.id;
+  $("loose").value=S.settings.loose;
+  renderAux();renderStrip();renderGoal();renderGear();renderPartners();renderInventory();renderChecklist();
+  $("tabCheck").classList.toggle("on",CK.tab==="check");$("tabTable").classList.toggle("on",CK.tab==="table");$("checkView").hidden=CK.tab!=="check";$("tableView").hidden=CK.tab!=="table";renderRules();
+  if(aid&&$(aid)&&$(aid)!==document.activeElement){try{$(aid).focus({preventScroll:true})}catch(e){}}
+}
+function fillDatalists(){
+  for(const s of [1,2,5])$("dl-"+s).innerHTML=GEM_NAMES[s].map(n=>`<option value="${esc(n)}">`).join("");
+  $("dl-all").innerHTML=[1,2,5].flatMap(s=>GEM_NAMES[s].map(n=>`<option value="${esc(n)}" label="${s}★">`)).join("");
+}
+function displayName(k){
+  if(S.wantNames&&S.wantNames[k])return S.wantNames[k];
+  for(const st of [5,2,1]){const f=GEM_NAMES[st].find(x=>nk(x)===k);if(f)return f}
+  const r=S.inventory.find(x=>nk(x.name)===k);if(r)return r.name;
+  return k.replace(/\b\w/g,c=>c.toUpperCase());
+}
+function starOfKey(k){
+  if(S.wantStars&&S.wantStars[k])return +S.wantStars[k];
+  const r=S.inventory.find(x=>nk(x.name)===k);if(r)return +r.star;
+  for(const st of [5,2,1])if(GEM_NAMES[st].some(x=>nk(x)===k))return st;
+  const w=GUIDE_WANTS[k];return w?(w.length===5?5:w.length===3?2:1):5;
+}
+const partQ={q:"",mine:true};
+function renderPartners(){
+  const keys=[...new Set([...Object.keys(GUIDE_WANTS),...Object.keys(S.wants||{})])];
+  const own=new Set(S.inventory.map(r=>nk(r.name)));
+  const mains=new Set(S.pieces.map(p=>nk(p.name)).filter(Boolean));
+  const q=nk(partQ.q);
+  const rows=keys.filter(k=>(!partQ.mine||own.has(k)||mains.has(k)||!GUIDE_WANTS[k])&&(!q||k.includes(q)||(wantsFor(S,k)||[]).some(w=>nk(w).includes(q))))
+    .sort((a,b)=>(mains.has(b)-mains.has(a))||starOfKey(b)-starOfKey(a)||displayName(a).localeCompare(displayName(b)));
+  const slotStars=st=>((S.layout[st]||{}).slots||[]).map(x=>+x.star);
+  $("partTable").innerHTML=`<thead><tr><th>Main gem</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th></th></tr></thead><tbody>${rows.map(k=>{
+    const st=starOfKey(k),ss=slotStars(st),w=wantsFor(S,k),edited=S.wants&&S.wants[k],kid=k.replace(/[^a-z0-9]/g,"_");
+    const cells=[0,1,2,3,4].map(i=>i<ss.length?`<td><input id="pw-${kid}-${i}" class="partIn" data-k="${esc(k)}" data-i="${i}" list="dl-${ss[i]}" value="${esc(w[i]||"")}" placeholder="${ss[i]}★" aria-label="${esc(displayName(k))} slot ${i+1}" style="min-width:9em"></td>`:`<td class="hint">–</td>`).join("");
+    return `<tr><td>${gemIcon(displayName(k),22)} <span class="st st${st}">${st}★</span> ${esc(displayName(k))}${mains.has(k)?' <span class="pill ok">main</span>':""}</td>${cells}<td>${edited?`<button class="small ghost partReset" data-k="${esc(k)}">${GUIDE_WANTS[k]?"Reset":"Remove"}</button>`:""}</td></tr>`}).join("")}</tbody>`;
+  const nEdit=Object.keys(S.wants||{}).length;
+  $("partSummary").textContent=`${keys.length} gems listed${nEdit?` · ${nEdit} edited by you`:""}`;
+}
+function starOfName(n){n=(n||"").trim().toLowerCase();for(const s of [1,2,5])if(GEM_NAMES[s].some(x=>x.toLowerCase()===n))return s;return null}
+
+document.addEventListener("change",e=>{
+  const t=e.target,d=t.dataset;
+  if(t.id==="ckOwned"){CK.owned=t.checked;return renderChecklist()}
+  if(t.id==="importFile"){if(t.files&&t.files[0])readImport(t.files[0]);t.value="";return}
+  if(t.id==="goalRes")return change(()=>{S.settings.goal=Math.max(0,+t.value||0)});
+  if(t.id==="loose")return change(()=>{S.settings.loose=Math.max(0,+t.value||0)});
+  if(t.id==="allowHigher")return change(()=>{S.settings.allowHigher=t.checked});
+  if(t.id==="addName"){const s=starOfName(t.value);if(s){$("addStar").value=s;$("addQual").hidden=s!==5}return}
+  if(t.id==="addStar"){$("addQual").hidden=t.value!=="5";return}
+  if(t.id==="partMine"){partQ.mine=t.checked;renderPartners();return}
+  if(t.classList.contains("partIn"))return change(()=>{const k=d.k;S.wants=S.wants||{};const a=wantsFor(S,k).slice();while(a.length<5)a.push("");a[+d.i]=t.value.trim();S.wants[k]=a});
+  if(t.classList.contains("auxSel"))return change(()=>{
+    S.aux[+d.i]=t.value||null;
+    const id=t.value;if(!id)return;
+    const r=S.inventory.find(x=>x.id===id);
+    // free the gem from gear if it is now over-used
+    const over=()=>(usageMap(S,null)[id]||0)>(+r.count||0);
+    for(const p of S.pieces){if(!over())break;p.slots.forEach(s=>{if(s.row===id&&over()){s.row=null;s.locked=false}})}
+    for(const p of S.pieces){if(!over())break;if(p.mainRow===id){p.mainRow=null;p.mainLocked=false;p.name="";p.rank="";p.pct="";p.slots=[]}}
+  });
+  if(t.classList.contains("mainSel"))return change(()=>{const p=S.pieces[d.pi];p.mainRow=t.value||null;p.reqOverride="";if(p.mainRow){p.slots=[];syncMain(S,p);ensureSlots(S,p);p.mainLocked=true}else p.mainLocked=false});
+  if(t.classList.contains("mainKeep"))return change(()=>{S.pieces[d.pi].mainLocked=t.checked});
+  if(t.classList.contains("slotSel"))return change(()=>{const s=S.pieces[d.pi].slots[d.si];s.row=t.value||null;s.locked=!!t.value});
+  if(t.classList.contains("lockBox"))return change(()=>{S.pieces[d.pi].slots[d.si].locked=t.checked});
+  if(t.classList.contains("want"))return change(()=>{const p=S.pieces[d.pi],k=nk(p.name);if(!k)return;S.wants=S.wants||{};const a=S.wants[k]=wantsFor(S,p.name).slice();a[+d.si]=t.value.trim();p.slots[d.si].want=t.value.trim()});
+  if(t.classList.contains("tabIn"))return change(()=>{S[d.t][d.s][d.i]=+t.value||0});
+  if(t.classList.contains("stepIn"))return change(()=>{S.steps[d.i][d.k]=t.value===""?"":+t.value});
+  if(t.classList.contains("tierIn"))return change(()=>{S.tiers=S.tiers||{};S.tiers[d.st]=t.value.split(/[,\s]+/).map(Number).filter(n=>n>0).sort((a,b)=>a-b)});
+  if(t.classList.contains("resIn"))return change(()=>{S.resRate[d.k]=+t.value||0});
+  if(t.classList.contains("layIn"))return change(()=>{S.layout[d.ms].slots[d.i][d.k]=+t.value||0;if(d.k==="star")S.pieces.forEach(p=>{if(+p.star===+d.ms&&p.slots[d.i]){p.slots[d.i].row=null;p.slots[d.i].locked=false}})});
+  if(d.pi!==undefined&&d.k){
+    return change(()=>{const p=S.pieces[d.pi];
+      if(d.k==="star"){p.star=+t.value;p.slots=[];ensureSlots(S,p);p.reqOverride=""}
+      else if(d.k==="name"){p.name=t.value;const s=starOfName(t.value);if(s&&s!==+p.star){p.star=s;p.slots=[];ensureSlots(S,p)}}
+      else if(d.k==="looseUsed")p.looseUsed=Math.max(0,+t.value||0);
+      else if(d.k==="quality")p.quality=+t.value;
+      else if(d.k==="rank")p.rank=t.value===""?"":clampRank(t.value);
+      else p[d.k]=t.value===""?"":+t.value;
+    });
+  }
+  if(d.id&&d.k){
+    return change(()=>{const r=S.inventory.find(x=>x.id===d.id);if(!r)return;
+      if(d.k==="name"){r.name=t.value;const s=starOfName(t.value);if(s)r.star=s;delete r.example}
+      else if(d.k==="star"){r.star=+t.value;if(r.star===5&&!r.quality)r.quality=3;S.pieces.forEach(p=>p.slots.forEach((s,i)=>{const L=layoutFor(S,p.star).slots[i];if(s.row===r.id&&L&&!slotAccepts(S,+L.star,r.star)){s.row=null;s.locked=false}}))}
+      else if(d.k==="power")r.power=t.value===""?"":+t.value;
+      else if(d.k==="rank")r.rank=clampRank(t.value);
+      else if(d.k==="pct")r.pct=Math.max(0,Math.min(99,+t.value||0));
+      else if(d.k==="quality")r.quality=+t.value;
+      else if(d.k==="awakened")r.awakened=t.checked;
+      else r.count=Math.max(0,Math.round(+t.value||0));
+    });
+  }
+});
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.id==="tabCheck"){CK.tab="check";return scheduleRender()}
+  if(t.id==="tabTable"){CK.tab="table";return scheduleRender()}
+  if(t.classList.contains("ckStar")){CK.star=+t.dataset.s;return renderChecklist()}
+  if(t.classList.contains("ckNewStar")){CK.newStar=+t.dataset.s;return renderChecklist()}
+  if(t.id==="ckNewAdd"){const n=$("ckNewName").value.trim();if(!n)return;$("ckNewName").value="";return change(()=>addGem(n,CK.newStar,1,1,0,3))}
+  if(t.classList.contains("addCopy"))return change(()=>{const n=t.dataset.name,st=+t.dataset.star;S.inventory.push({id:uid(),name:n,star:st,quality:st===5?3:"",rank:1,pct:0,count:1,power:""})});
+  if(t.dataset.act==="q")return change(()=>ckSetQuality(t.dataset.id,+t.dataset.v));
+  if(t.dataset.act&&t.dataset.id)return change(()=>ckAct(t.dataset.act,t.dataset.id));
+  if(t.id==="exportBtn")return exportBackup();
+  if(t.id==="impCancel"){pendingImport=null;$("backupMsg").innerHTML="";return}
+  if(t.id==="impInv"&&pendingImport){const st=pendingImport;pendingImport=null;$("backupMsg").innerHTML=`<p class="hint">Inventory replaced.</p>`;return change(()=>{S.inventory=st.inventory;S.pieces.forEach(p=>{if(p.mainRow&&!S.inventory.some(r=>r.id===p.mainRow)){p.mainRow=null;p.mainLocked=false}p.slots.forEach(s=>{if(s.row&&!S.inventory.some(r=>r.id===s.row)){s.row=null;s.locked=false}})});S.aux=(S.aux||[]).map(a=>a&&S.inventory.some(r=>r.id===a)?a:null)})}
+  if(t.id==="impAll"&&pendingImport){const st=pendingImport;pendingImport=null;$("backupMsg").innerHTML=`<p class="hint">Plan replaced from backup.</p>`;return change(()=>{S=normalize(st)})}
+  if(t.id==="planAwaken")return change(()=>runPlan(S,"min"));
+  if(t.id==="planMax")return change(()=>runPlan(S,"max"));
+  if(t.id==="pickMains")return change(()=>{autoPickMains(S);runPlan(S,"max")});
+  if(t.id==="clearPlan")return change(()=>S.pieces.forEach(p=>{p.slots.forEach(s=>{if(!s.locked)s.row=null});p.looseUsed=0}));
+  if(t.classList.contains("clearPiece"))return change(()=>{const p=S.pieces[t.dataset.pi];p.slots.forEach(s=>{s.row=null;s.locked=false});p.looseUsed=0});
+  if(t.id==="addBtn"){
+    const name=$("addName").value.trim(),star=+$("addStar").value,rank=clampRank($("addRank").value),count=Math.max(1,Math.round(+$("addCount").value||1)),pct=Math.max(0,Math.min(99,+$("addPct").value||0)),q=+$("addQual").value;
+    return change(()=>{addGem(name,star,rank,count,pct,q);$("addName").value="";$("addCount").value=1;$("addPct").value=0;$("addName").focus()});
+  }
+  if(t.classList.contains("delRow"))return change(()=>{const id=t.dataset.id;S.inventory=S.inventory.filter(r=>r.id!==id);S.pieces.forEach(p=>p.slots.forEach(s=>{if(s.row===id){s.row=null;s.locked=false}}))});
+  if(t.id==="clearEx")return change(()=>{const ids=new Set(S.inventory.filter(r=>r.example).map(r=>r.id));S.inventory=S.inventory.filter(r=>!r.example);S.pieces.forEach(p=>p.slots.forEach(s=>{if(ids.has(s.row)){s.row=null;s.locked=false}}))});
+  if(t.id==="partAdd"){const name=$("partNewName").value.trim();if(!name)return;const k=nk(name);
+    return change(()=>{S.wants=S.wants||{};S.wantNames=S.wantNames||{};S.wantStars=S.wantStars||{};if(!S.wants[k])S.wants[k]=wantsFor(S,k).slice();S.wantNames[k]=name;S.wantStars[k]=+$("partNewStar").value;$("partNewName").value="";partQ.q="";$("partSearch").value=""})}
+  if(t.classList.contains("partReset"))return change(()=>{const k=t.dataset.k;if(S.wants)delete S.wants[k];if(S.wantNames)delete S.wantNames[k];if(S.wantStars)delete S.wantStars[k]});
+  if(t.id==="addStep")return change(()=>S.steps.push({star:5,rank:"",pct:"",gp:""}));
+  if(t.classList.contains("delStep"))return change(()=>S.steps.splice(+t.dataset.i,1));
+  if(t.id==="bulkBtn"){
+    const lines=$("bulk").value.split(/\n/).map(l=>l.trim()).filter(Boolean);let ok=0;const bad=[];
+    change(()=>{for(const l of lines){const x=l.split(/[,\t]/).map(v=>v.trim());
+      const name=x[0],star=+x[1],rank=+x[2],qty=x[3]?+x[3]:1,pct=x[4]?+x[4]:0,q=x[5]?+x[5]:3;
+      if(!name||![1,2,5].includes(star)||!(rank>=1&&rank<=10)||!(qty>=1)||!(pct>=0&&pct<100)||![2,3,4,5].includes(q)){bad.push(l);continue}
+      addGem(name,star,rank,Math.round(qty),pct,q);ok++}});
+    $("bulkMsg").textContent=`Added ${ok} line${ok===1?"":"s"}${bad.length?`, skipped ${bad.length}: ${bad.slice(0,3).join(" | ")}`:""}`;
+    if(!bad.length)$("bulk").value="";
+  }
+});
+document.addEventListener("input",e=>{if(e.target.id==="partSearch"){partQ.q=e.target.value;renderPartners()}if(e.target.id==="ckSearch"){CK.q=e.target.value;renderChecklist()}});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&["addName","addRank","addCount","addPct"].includes(e.target.id)){e.preventDefault();$("addBtn").click()}});
+function addGem(name,star,rank,count,pct,q){
+  const quality=star===5?q:"";
+  const ex=S.inventory.find(r=>r.name.trim().toLowerCase()===name.toLowerCase()&&+r.star===star&&clampRank(r.rank)===rank&&(+r.pct||0)===pct&&(star!==5||+r.quality===quality)&&!r.example&&(r.power===undefined||r.power===""));
+  if(ex)ex.count=(+ex.count||0)+count;else S.inventory.push({id:uid(),name,star,quality,rank,pct,count,power:""});
+}
+
+fillDatalists();
+try{const ls=localStorage.getItem("di-gem-planner");if(ls)S=normalize(JSON.parse(ls))}catch(e){}
+render();
+(async()=>{
+  try{db=window.claude&&window.claude.use?await window.claude.use("db"):null}catch(e){db=null}
+  if(!db){setSave(lastSaved?"Saved in this browser":"Saving in this browser only");return}
+  docRef=db.doc("planner/state");
+  let first=true;
+  const timer=setTimeout(()=>{if(first)setSave("Can't reach saved data yet")},10000);
+  docRef.onSnapshot(snap=>{
+    if(snap.metadata.hasPendingWrites)return;
+    if(!snap.metadata.fromCache)clearTimeout(timer);
+    if(snap.exists){
+      const body=snap.data().state;
+      if(typeof body==="string"&&body!==lastSaved&&body!==JSON.stringify(S)){
+        try{S=normalize(JSON.parse(body));lastSaved=body;scheduleRender()}catch(e){}
+      }else if(typeof body==="string")lastSaved=body;
+    }
+    if(first&&!snap.metadata.fromCache){first=false;setSave(snap.exists?"Saved":"Not saved yet")}
+  },err=>{clearTimeout(timer);setSave("Saved data unavailable")});
+})();
+</script>
+
+</body>
+</html>
